@@ -13,6 +13,11 @@ struct ContentView: View {
             Image(systemName: "globe")
                 .imageScale(.large)
                 .foregroundStyle(.tint)
+            
+            Image("Zambito")
+                .resizable()
+                .scaledToFit()
+            
             Text ("Hello, world!")
             Text("Hello, world!")
             Text("Zambito")
