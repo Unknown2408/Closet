@@ -9,21 +9,28 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
+        ZStack {
             
-            Image("Zambito")
-                .resizable()
-                .scaledToFit()
+            VStack {
+                Image("LogoApp")
+                    .resizable()
+                    .scaledToFit()
+                
+                Text ("Closet")
+                    .font(.system(.largeTitle, design: .serif))
+                    .foregroundColor(.white)
+                    .padding(19)
+                
+            }
+            .padding(.bottom, 120)
+            .padding()
+            .frame(maxWidth: .infinity, maxHeight: .infinity) // Espande l'HStack a tutto schermo
+            .background(Color.black)
+            .ignoresSafeArea()
             
-            Text ("Hello, world!")
-            Text("Hello, world!")
-            Text("Zambito")
-            Text("Ciao, Nitharsan")
+        
         }
-        .padding()
+        
     }
 }
 
