@@ -6,29 +6,25 @@
 //
 
 import SwiftUI
-
 @main
+
 struct ClosetApp: App {
-    
     @State private var mostraFaseLogin: Bool = false
-    
     var body: some Scene {
         WindowGroup {
-            if mostraFaseLogin{
+            if mostraFaseLogin {
                 LoginView()
-            } else{
+            } else {
                 ContentView()
-                    .onAppear{
-                        DispatchQueue.main.asyncAfter(deadline: .now()+4.0){
-                            withAnimation{
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
+                            withAnimation {
                                 mostraFaseLogin = true
                             }
                         }
                     }
             }
-            
-            
-            ContentView()
+            // ELIMINA la riga qui sotto che diceva ContentView()
         }
     }
 }
