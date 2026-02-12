@@ -8,65 +8,67 @@
 import SwiftUI
 
 struct LoginView: View {
-    
-    @State private var nome: String = ""
+    @Binding var loginEffettuato: Bool
+    @Binding var nome: String 
     @State private var cognome: String = ""
+    
+    var isFormValid: Bool {
+        !nome.trimmingCharacters(in: .whitespaces).isEmpty &&
+        !cognome.trimmingCharacters(in: .whitespaces).isEmpty
+    }
     
     var body: some View {
         ZStack {
+            Color.black.ignoresSafeArea()
             
             VStack {
-                //Immagine Logo
                 Image("LogoApp")
                     .resizable()
                     .scaledToFit()
+                    .frame(height: 150)
                 
-                
-                //Scritta
-                Text ("Welcome in your Closet!")
-                    .font(.system(size:25,weight: .bold, design: .serif))
+                Text("Welcome in your Closet!")
+                    .font(.system(size: 25, weight: .bold, design: .serif))
                     .foregroundColor(.white)
-                    .padding(19)
+                    .padding(.top, 10)
                 
-            }
-            .padding(.bottom, 360)
-            .padding()
-            .frame(maxWidth: .infinity, maxHeight: .infinity) // Espande l'HStack a tutto schermo
-            .background(Color.black)
-            .ignoresSafeArea()
-            
-            //Registrazione
-            
-            Text("Enter your name and your surname")
-                .padding(.top, 120)
-                .font(.system(size:18,weight: .bold, design: .serif))
-                .foregroundColor(.white)
-                            
-            VStack(spacing: 15) {
-                // Campo Nome
+                Spacer().frame(height: 40)
                 
-                TextField("Name", text: $nome)
-                    .padding()
-                    .background(Color.white.opacity(0.1)) // Sfondo grigio scuro semitrasparente
-                    .cornerRadius(10)
-                    .foregroundColor(.white) // Colore del testo che scrivi
-                
-                TextField("Surname", text: $cognome)
-                    .padding()
-                    .background(Color.white.opacity(0.1)) // Sfondo grigio scuro semitrasparente
-                    .cornerRadius(10)
-                    .foregroundColor(.white) // Colore del testo che scrivi
+                VStack(spacing: 15) {
+                    TextField("", text: $nome, prompt: Text("Name").foregroundColor(.gray.opacity(0.6)))
+                        .padding()
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(10)
+                        .foregroundColor(.white)
                     
+                    TextField("", text: $cognome, prompt: Text("Surname").foregroundColor(.gray.opacity(0.6)))
+                        .padding()
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(10)
+                        .foregroundColor(.white)
+                }
+                .padding(.horizontal, 40)
+                
+                Button(action: {
+                    withAnimation {
+                        loginEffettuato = true
+                    }
+                }) {
+                    Text("Next")
+                        .font(.headline)
+                        .foregroundColor(isFormValid ? .black : .white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 50)
+                        .background(isFormValid ? Color.white : Color.gray.opacity(0.3))
+                        .cornerRadius(10)
+                }
+                .padding(.horizontal, 40)
+                .padding(.top, 30)
+                .disabled(!isFormValid)
+                
+                Spacer()
             }
-            .padding(.horizontal, 40) // Distanza dai bordi dello schermo
-            .padding(.top, 300)
-            
-        
+            .padding(.top, 50)
         }
-        
     }
-}
-
-#Preview {
-    LoginView()
 }

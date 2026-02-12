@@ -6,25 +6,53 @@
 //
 
 import SwiftUI
+
 @main
 
+
+
 struct ClosetApp: App {
-    @State private var mostraFaseLogin: Bool = false
+    @State private var splashFinita: Bool = false
+    @State private var loginEffettuato: Bool = false
+    @State private var nomeUtente: String = ""
+
     var body: some Scene {
         WindowGroup {
-            if mostraFaseLogin {
-                LoginView()
-            } else {
-                ContentView()
-                    .onAppear {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
-                            withAnimation {
-                                mostraFaseLogin = true
-                            }
+            ZStack {
+                Color.black.ignoresSafeArea()
+                if !splashFinita {
+                        VStack(spacing: 40) {
+                            Image("LogoApp")
+                                .resizable()
+                                .scaledToFill()
+                                .clipped()
+                                .frame(width: 280, height: 280)
+                            
+                            Text("Closet")
+                                .font(.system(.largeTitle, design: .serif))
+                                .foregroundColor(.white)
+                                .fontWeight(.bold) // Opzionale: lo rende più elegante
+                            
+                            Spacer()
+                                .frame(height: 150)
                         }
-                    }
+                        .padding(.top, 100)
+                        .transition(.opacity)
+                }else if !loginEffettuato {
+                    LoginView(loginEffettuato: $loginEffettuato, nome: $nomeUtente)
+                        .transition(.opacity)
+                }else {
+                    HomeView(nome: nomeUtente)
+                        .transition(.opacity)
+                }
             }
-            // ELIMINA la riga qui sotto che diceva ContentView()
+            .animation(.easeInOut(duration: 1.2), value: splashFinita)
+            .animation(.easeInOut(duration: 1.2), value: loginEffettuato)
+            .onAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
+                    splashFinita = true
+                }
+            }
         }
     }
 }

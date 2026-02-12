@@ -4,36 +4,43 @@
 //
 //  Created by Nitharsan on 10/02/26.
 //
-
 import SwiftUI
 
 struct ContentView: View {
-    var body: some View {
-        ZStack {
-            
-            VStack {
-                Image("LogoApp")
-                    .resizable()
-                    .scaledToFit()
-                
-                Text ("Closet")
-                    .font(.system(.largeTitle, design: .serif))
-                    .foregroundColor(.white)
-                    .padding(19)
-                
-            }
-            .padding(.bottom, 120)
-            .padding()
-            .frame(maxWidth: .infinity, maxHeight: .infinity) // Espande l'HStack a tutto schermo
-            .background(Color.black)
-            .ignoresSafeArea()
-            
-        
-        }
-        
+    @Binding var nome: String
+    @State private var cognome: String = ""
+    
+    var isFormValid: Bool {
+        !nome.trimmingCharacters(in: .whitespaces).isEmpty &&
+        !cognome.trimmingCharacters(in: .whitespaces).isEmpty
     }
-}
 
-#Preview {
-    ContentView()
+    var body: some View {
+        NavigationStack { // Necessario per il passaggio tra file
+            VStack(spacing: 20) {
+                TextField("Nome", text: $nome)
+                    .textFieldStyle(.roundedBorder)
+                    .padding(.horizontal)
+                
+                TextField("Cognome", text: $cognome)
+                    .textFieldStyle(.roundedBorder)
+                    .padding(.horizontal)
+                
+                // Il NavigationLink punta alla struct HomeView
+                NavigationLink(destination: HomeView(nome: nome)) {
+                    Text("Next")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(isFormValid ? Color.white : Color.gray)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                .disabled(!isFormValid)
+                .padding()
+                
+                Spacer()
+            }
+            .navigationTitle("Next")
+        }
+    }
 }
