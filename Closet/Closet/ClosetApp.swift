@@ -26,15 +26,11 @@ struct ClosetApp: App {
                                 .resizable()
                                 .scaledToFill()
                                 .clipped()
-                                .frame(width: 280, height: 280)
+                                .frame(width: 350, height: 250)
                             
-                            Text("Closet")
-                                .font(.system(.largeTitle, design: .serif))
-                                .foregroundColor(.white)
-                                .fontWeight(.bold) // Opzionale: lo rende più elegante
                             
                             Spacer()
-                                .frame(height: 150)
+                                .frame(height:220)
                         }
                         .padding(.top, 100)
                         .transition(.opacity)

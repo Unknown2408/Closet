@@ -13,8 +13,7 @@ struct LoginView: View {
     @State private var cognome: String = ""
     
     var isFormValid: Bool {
-        !nome.trimmingCharacters(in: .whitespaces).isEmpty &&
-        !cognome.trimmingCharacters(in: .whitespaces).isEmpty
+        !nome.trimmingCharacters(in: .whitespaces).isEmpty
     }
     
     var body: some View {
@@ -35,17 +34,13 @@ struct LoginView: View {
                 Spacer().frame(height: 40)
                 
                 VStack(spacing: 15) {
-                    TextField("", text: $nome, prompt: Text("Name").foregroundColor(.gray.opacity(0.6)))
+                    TextField("", text: $nome, prompt: Text("Nickname").foregroundColor(.gray.opacity(0.6)))
                         .padding()
                         .background(Color.white.opacity(0.1))
                         .cornerRadius(10)
                         .foregroundColor(.white)
                     
-                    TextField("", text: $cognome, prompt: Text("Surname").foregroundColor(.gray.opacity(0.6)))
-                        .padding()
-                        .background(Color.white.opacity(0.1))
-                        .cornerRadius(10)
-                        .foregroundColor(.white)
+        
                 }
                 .padding(.horizontal, 40)
                 
