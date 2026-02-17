@@ -42,6 +42,7 @@ struct HomeView: View {
 
 
 struct ClosetContentView: View {
+    @State private var showingAddItem = false
     var body: some View {
         ZStack {
             Color.white.ignoresSafeArea()
@@ -58,22 +59,23 @@ struct ClosetContentView: View {
                         Spacer() // Spinge il bottone tutto a destra (opzionale)
 
                         Button(action: {
-                                print("Aggiungi elemento")
-                            }) {
-                                Image(systemName: "plus")
-                                    .font(.system(size: 20, weight: .bold)) // Spessore del +
-                                    .foregroundColor(.white) // Il + diventa bianco
-                                    .frame(width: 44, height: 44) // Area cliccabile standard Apple
-                                    .background(
-                                        // Effetto "Liquid Glass" scuro
-                                        Circle()
-                                            .fill(Color.black.opacity(0.8))
-                                            .blur(radius: 0.5) // Leggera sfocatura sui bordi
-                                    )
-                                    // Background materiale (opzionale per vero effetto glass)
-                                    .background(Circle().fill(.ultraThinMaterial))
-                                    .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
-                            }
+                            
+                            showingAddItem = true
+                        }) {
+                            Image(systemName: "plus")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(width: 44, height: 44)
+                                .background(
+                                    Circle()
+                                        .fill(Color.black.opacity(0.8))
+                                        .blur(radius: 0.5)
+                                )
+                        }
+                        // Questo "ascolta" quando showingAddItem diventa true e apre la vista
+                        .sheet(isPresented: $showingAddItem) {
+                            NewItemView()
+                        }
                         
                     }
                     
