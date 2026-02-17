@@ -28,7 +28,7 @@ struct ContentView: View {
                     .padding(.horizontal)
                 
                 // Il NavigationLink punta alla struct HomeView
-                NavigationLink(destination: HomeView(nome: nome)) {
+                NavigationLink(destination: HomeView()) {
                     Text("Next")
                         .frame(maxWidth: .infinity)
                         .padding()

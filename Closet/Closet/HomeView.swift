@@ -8,25 +8,79 @@
 import SwiftUI
 
 struct HomeView: View {
-    var nome: String // Riceve il nome dal login
+    @State private var selection = 0
     
     var body: some View {
+        // La TabView deve stare al "livello più alto"
+        TabView(selection: $selection) {
+            
+            // TAB 1: Visualizza il contenuto dell'armadio
+            ClosetContentView()
+                .tabItem {
+                    Label("Closet", systemImage: "hanger")
+                }
+                .tag(0)
+            
+            // TAB 2: Visualizza la vista Outfit
+            OutfitView()
+                .tabItem {
+                    Label("Outfit", systemImage: "tshirt")
+                }
+                .tag(1)
+            
+            //TAB 3: Ricerca
+            SearchView()
+                .tabItem {
+                    Label("Search", systemImage: "magnifyingglass")
+                }
+                .tag(0)
+            
+        }
+        .accentColor(.black)
+    }
+}
+
+
+struct ClosetContentView: View {
+    var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            Color.white.ignoresSafeArea()
             
             VStack(alignment: .leading, spacing: 20) {
                 // Header: Welcome + Nome
                 VStack(alignment: .leading, spacing: 5) {
-                    Text("Welcome,")
-                        .font(.system(size: 24, weight: .light, design: .serif))
-                        .foregroundColor(.gray)
                     
-                    Text(nome)
-                        .font(.system(size: 40, weight: .bold, design: .serif))
-                        .foregroundColor(.white)
+                    HStack{
+                        Text("My closet")
+                            .font(.system(size: 40, weight: .bold, design: .default))
+                            .foregroundColor(.black)
+                    
+                        Spacer() // Spinge il bottone tutto a destra (opzionale)
+
+                        Button(action: {
+                                print("Aggiungi elemento")
+                            }) {
+                                Image(systemName: "plus")
+                                    .font(.system(size: 20, weight: .bold)) // Spessore del +
+                                    .foregroundColor(.white) // Il + diventa bianco
+                                    .frame(width: 44, height: 44) // Area cliccabile standard Apple
+                                    .background(
+                                        // Effetto "Liquid Glass" scuro
+                                        Circle()
+                                            .fill(Color.black.opacity(0.8))
+                                            .blur(radius: 0.5) // Leggera sfocatura sui bordi
+                                    )
+                                    // Background materiale (opzionale per vero effetto glass)
+                                    .background(Circle().fill(.ultraThinMaterial))
+                                    .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
+                            }
+                        
+                    }
+                    
+                    
                 }
                 .padding(.horizontal, 30)
-                .padding(.top, 60)
+                .padding(.top)
                 
                 Spacer()
                 
@@ -53,6 +107,8 @@ struct HomeView: View {
                 }
                 .padding(.bottom, 50)
             }
+            
+            
         }
     }
 }
@@ -79,4 +135,8 @@ struct CircleButton: View {
             }
         }
     }
+}
+
+#Preview {
+    HomeView()
 }

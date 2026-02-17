@@ -38,7 +38,7 @@ struct ClosetApp: App {
                     LoginView(loginEffettuato: $loginEffettuato, nome: $nomeUtente)
                         .transition(.opacity)
                 }else {
-                    HomeView(nome: nomeUtente)
+                    HomeView()
                         .transition(.opacity)
                 }
             }
