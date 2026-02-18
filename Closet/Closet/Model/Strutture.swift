@@ -129,7 +129,6 @@ struct Cloth: Identifiable, Codable {
     var favourite: Bool = false
 }
 
-// Ho aggiunto Identifiable e Codable anche qui
 struct Outfit: Identifiable, Codable {
     var id = UUID()
     let outfitName: String
@@ -137,6 +136,6 @@ struct Outfit: Identifiable, Codable {
     var items: [UUID]
     
     var favourite: Bool = false
-    var dateCreated: Date = Date() // Corretto il typo "dateCrated"
+    var dateCreated: Date = Date()
 }
 

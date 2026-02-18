@@ -26,8 +26,8 @@ import SwiftUI
     
     /// Inizializzatore
     init() {
-            load() // Appena la classe viene creata, prova a caricare i dati
-        }
+        load() // Appena la classe viene creata, prova a caricare i dati
+    }
     
     /// Definisco la funzione save
     func save() {
@@ -66,7 +66,7 @@ import SwiftUI
         // Rimuovo gli spazi vuori
         let cleanBrand = brand.trimmingCharacters(in: .whitespacesAndNewlines)
         // Creo l'oggetto
-        let newItem = Cloth(image: image, position: position, type: type, season: season, color: color, brand: brand, style: style, description: description)
+        let newItem = Cloth(image: image, position: position, type: type, season: season, color: color, brand: cleanBrand, style: style, description: description)
         // inserisco nell'inventario
         inventory.append(newItem)
         save()
@@ -82,20 +82,17 @@ import SwiftUI
     }
     
     // Funzione per eliminazione multipla (Bulk Delete)
-        // Accetta un Set<UUID> perché è quello che ci restituisce la lista di SwiftUI
-        func deleteMultipleItems(withIds ids: Set<UUID>) {
-            
-            // LOGICA DEL FILTRO:
-            // "Ricostruisci l'inventario tenendo solo gli elementi il cui ID
-            // NON (!) è contenuto nella lista 'ids' da cancellare"
-            inventory = inventory.filter { item in
-                !ids.contains(item.id)
-            }
-            
-            // Salviamo una volta sola alla fine di tutto
-            save()
-            print("🗑️ Rimossi \(ids.count) elementi in un colpo solo.")
+    // Accetta un Set<UUID> perché è quello che ci restituisce la lista di SwiftUI
+    func deleteMultipleItems(withIds ids: Set<UUID>) {
+        
+        // LOGICA DEL FILTRO:
+        // "Ricostruisci l'inventario tenendo solo gli elementi il cui ID
+        // NON (!) è contenuto nella lista 'ids' da cancellare"
+        inventory = inventory.filter { item in
+            !ids.contains(item.id)
         }
+        save()
+    }
     
     /// Contrassegno capi preferiti
     func toggleFavorite(ofItemWithID id: UUID){
@@ -109,11 +106,33 @@ import SwiftUI
     
     /// Aggiunta outfit
     func addOutfit(name: String, items: [UUID]){
-        var newOutfit = Outfit(id: UUID(), outfitName: <#T##String#>: name, items: items)
+        var newOutfit = Outfit(outfitName: name, items: items)
         outfits.append(newOutfit)
         save()
     }
     
-
+    func deleteOutfit(id: UUID){
+        if let index = outfits.firstIndex(where: { $0.id == id }) {
+            outfits.remove(at: index)
+            save()
+        }
+    }
+        
+    func deleteMultipleOutfits(withIds ids: Set<UUID>) {
+            
+        // LOGICA DEL FILTRO:
+        // "Ricostruisci l'inventario tenendo solo gli elementi il cui ID
+        // NON (!) è contenuto nella lista 'ids' da cancellare"
+        outfits = outfits.filter { outfit in
+            !ids.contains(outfit.id)
+        }
+        save()
+    }
+    
+    /// Restituisce i capi reali appartenenti a un determinato outfit
+    func items(for outfit: Outfit) -> [Cloth] {
+        return inventory.filter { outfit.items.contains($0.id) }
+    }
     
 }
+
