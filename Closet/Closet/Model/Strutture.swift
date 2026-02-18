@@ -1,11 +1,11 @@
-enum SEASON {
+enum SEASON: String, CaseIterable {
     case WINTER;
     case SUMMER;
     case FALLS;
     case SPRING;
 }
 
-enum POS: String {
+enum POS: String, CaseIterable {
     case TOP = "Tops";
     case BOTTOM = "Bottoms";
     case FOOTWEAR = "Footwear";
@@ -17,7 +17,7 @@ enum POS: String {
     
 }
 
-enum TYPE{
+enum TYPE: String, CaseIterable{
     // TOP
     case T_SHIRT
     case SHIRT
@@ -31,7 +31,7 @@ enum TYPE{
     case TROUSERS
     case SHORTS
     case JEANS
-    case ACTIVEWEAR
+    //case ACTIVEWEAR
     // Outwear
     case COATS
     case JACKETS
@@ -42,7 +42,7 @@ enum TYPE{
     case SUITS
     case WORKWEAR
     case BODIES
-    case ACTIVEWEAR
+    // case ACTIVEWEAR
     case ROBES
     // Accessories
     case BAGS
@@ -51,7 +51,7 @@ enum TYPE{
     case SOCKS_AND_TI
 }
 
-enum COL{
+enum COL, CaseIterable{
     
 }
 
