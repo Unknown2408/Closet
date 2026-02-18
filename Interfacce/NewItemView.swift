@@ -1,10 +1,3 @@
-//
-//  NewItemView.swift
-//  Closet
-//
-//  Created by Emanuele Restivo on 17/02/26.
-//
-
 import SwiftUI
 
 struct NewItemView: View {

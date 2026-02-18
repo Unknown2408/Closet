@@ -1,10 +1,3 @@
-//
-//  LoginView.swift
-//  Closet
-//
-//  Created by Emanuele Restivo on 11/02/26.
-//
-
 import SwiftUI
 
 struct LoginView: View {

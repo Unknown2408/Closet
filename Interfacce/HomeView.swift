@@ -1,10 +1,3 @@
-//
-//  HomeView.swift
-//  Closet
-//
-//  Created by Nitharsan on 11/02/26.
-//
-
 import SwiftUI
 
 struct HomeView: View {

@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  Closet
-//
-//  Created by Nitharsan on 10/02/26.
-//
-
 import SwiftUI
 
 struct ContentView: View {

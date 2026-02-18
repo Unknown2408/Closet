@@ -16,6 +16,11 @@
 			path = Closet;
 			sourceTree = "<group>";
 		};
+		D19821AF2F45CFBB00CB7711 /* Interfacce */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Interfacce;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -34,6 +39,7 @@
 			children = (
 				6805D8122F3B3DD600B11B59 /* Closet */,
 				6805D8112F3B3DD600B11B59 /* Products */,
+				D19821AF2F45CFBB00CB7711 /* Interfacce */,
 			);
 			sourceTree = "<group>";
 		};
@@ -62,6 +68,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				6805D8122F3B3DD600B11B59 /* Closet */,
+				D19821AF2F45CFBB00CB7711 /* Interfacce */,
 			);
 			name = Closet;
 			packageProductDependencies = (
