@@ -19,11 +19,20 @@ enum TYPE{
 }
 
 
-struct cloth {
+struct Cloth {
     let position : [POS]
     let type : [TYPE]
     let season : [SEASON]
     
-    let brand: [String]
-    let style: [String]
+    var brand: [String]
+    var style: [String]
+    var description: [String]
 }
+
+struct Outfit{
+    let outfit_name: String
+    var indument: [Cloth]
+    let favourite: Bool
+}
+
+
