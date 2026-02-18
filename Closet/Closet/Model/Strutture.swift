@@ -48,11 +48,12 @@ enum TYPE: String, CaseIterable{
     case BAGS
     case TIES
     case SCARVES_AND_GLOVES
-    case SOCKS_AND_TI
+    case SOCKS_AND_TIGHTS
+    case BELTS
 }
 
-enum COL, CaseIterable{
-    
+enum COL: String, CaseIterable{
+    case RED = "Red"
 }
 
 
