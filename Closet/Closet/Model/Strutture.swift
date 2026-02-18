@@ -1,85 +1,88 @@
 import Foundation
+import Observation
+import SwiftUI
 
-// 1. STAGIONI
+// 1. SEASONS (Stagioni)
 enum Season: String, CaseIterable, Codable {
-    case winter = "Inverno"
-    case summer = "Estate"
-    case falls = "Autunno" // Di solito è "Fall" o "Autumn"
-    case spring = "Primavera"
+    case winter = "Winter"
+    case summer = "Summer"
+    case fall = "Fall"   // "Autumn" va bene pure, ma Fall è standard US
+    case spring = "Spring"
 }
 
-// 2. POSIZIONE (Macro-Categorie)
+// 2. POSITION (Macro-Categorie)
 enum Position: String, CaseIterable, Codable, Identifiable {
     case top = "Tops"
     case bottom = "Bottoms"
     case footwear = "Footwear"
-    case outwear = "Outwear" // O "Outerwear"
+    case outerwear = "Outerwear" // Corretto da "Outwear"
     case accessories = "Accessories"
     case fullbody = "Fullbody"
     
+    // ID che ritorna il valore della stringa associata
     var id: String { self.rawValue }
 }
 
-// 3. TIPO DI CAPO (Micro-Categorie)
+// 3. CLOTHING TYPE (Micro-Categorie)
 enum ClothingType: String, CaseIterable, Codable, Identifiable {
     // TOP
-    case tShirt = "T-shirt"
-    case shirt = "Camicia"
-    case sweater = "Maglione"
-    // case TOPS (Rimosso: è ridondante avere una categoria generica dentro i tipi specifici)
-    case cardigan = "Cardigan"
-    case hoodie = "Felpa"
+    case tShirt = "T-shirts"
+    case shirt = "Shirts"
+    case sweater = "Sweaters"
+    case tops = "Tops" // Mantenuto come richiesto
+    case cardigan = "Cardigans"
+    case hoodie = "Hoodies"
     
     // Bottoms
-    case skirt = "Gonna"
-    case trousers = "Pantaloni"
-    case shorts = "Pantaloncini"
+    case skirt = "Skirts"
+    case trousers = "Trousers" // o "Pants"
+    case shorts = "Shorts"
     case jeans = "Jeans"
     
-    // Outwear
-    case coat = "Cappotto"
-    case jacket = "Giacca"
-    case cape = "Mantella"
+    // Outerwear
+    case coat = "Coats"
+    case jacket = "Jackets"
+    case cape = "Capes"
     
     // Full body
-    case dress = "Abito"
-    case jumpsuit = "Tuta Intera"
-    case suit = "Completo"
-    case robe = "Accappatoio/Vestaglia"
+    case dress = "Dresses"
+    case jumpsuit = "Jumpsuits"
+    case suit = "Suits"
+    case robe = "Robes"
     
-    // Activewear (Caso speciale multi-ruolo)
-    case activewear = "Abbigliamento Sportivo"
-    case workwear = "Abbigliamento Lavoro"
+    // Activewear (Uncountable nouns, treated as plural context)
+    case activewear = "Activewear"
+    case workwear = "Workwear"
     
     // Accessories
-    case bag = "Borsa"
-    case tie = "Cravatta"
-    case scarf = "Sciarpa"
-    case belt = "Cintura"
-    case glasses = "Occhiali"
-    case hat = "Cappello"
-    case jewellery = "Gioielli"
+    case bag = "Bags"
+    case tie = "Ties"
+    case scarf = "Scarves"
+    case belt = "Belts"
+    case glasses = "Glasses"
+    case hat = "Hats"
+    case jewellery = "Jewellery"
     
     // Footwear
-    case flats = "Scarpe Basse"
-    case heels = "Tacchi"
-    case sandals = "Sandali"
+    case flats = "Flats"
+    case heels = "Heels"
+    case sandals = "Sandals"
     case sneakers = "Sneakers"
-    case boots = "Stivali"
+    case boots = "Boots"
     
     var id: String { self.rawValue }
     
-    // LOGICA CORRETTA DELLE POSIZIONI
+    // LOGICA DELLE POSIZIONI
     var possiblePositions: [Position] {
         switch self {
-        case .tShirt, .shirt, .sweater, .cardigan, .hoodie:
+        case .tShirt, .shirt, .sweater, .cardigan, .hoodie, .tops:
             return [.top]
             
         case .skirt, .trousers, .shorts, .jeans:
             return [.bottom]
             
         case .coat, .jacket, .cape:
-            return [.outwear] // CORRETTO (Era .BOTTOM prima)
+            return [.outerwear]
             
         case .dress, .jumpsuit, .suit, .robe:
             return [.fullbody]
@@ -91,41 +94,49 @@ enum ClothingType: String, CaseIterable, Codable, Identifiable {
             return [.footwear]
             
         case .activewear:
-            return [.top, .bottom, .fullbody] // Rimosso duplicato
+            return [.top, .bottom, .fullbody]
             
         case .workwear:
-            return [.top, .bottom, .fullbody, .outwear]
+            return [.top, .bottom, .fullbody, .outerwear]
         }
     }
 }
 
 // DA FARE
-enum COL: String, CaseIterable{
+// Ho aggiunto Codable per poterlo salvare nel JSON insieme al vestito
+enum Color: String, CaseIterable, Codable {
     case RED = "Red"
 }
 
 
-struct Cloth {
+// Ho aggiunto Identifiable (per le liste UI) e Codable (per il salvataggio)
+struct Cloth: Identifiable, Codable {
+    // ID per l'inserimento nell'inventory
     var id = UUID()
     
-    var position : [Position]
-    let type : ClothingType
-    var season : [Season]
+    // immagine associata
+    var image: String
     
-    var color: [COL]
+    // variabili per la ricerca
+    var position : Position
+    var type : ClothingType
+    var season : [Season]
+    var color: [Color]
     var brand: String
     var style: [String]
     var description: String
+    
+    var favourite: Bool = false
 }
 
-struct Outfit{
+// Ho aggiunto Identifiable e Codable anche qui
+struct Outfit: Identifiable, Codable {
     var id = UUID()
-    let outfit_name: String
+    let outfitName: String
     
     var items: [UUID]
     
     var favourite: Bool = false
-    var dateCrated: Date = Date()
+    var dateCreated: Date = Date() // Corretto il typo "dateCrated"
 }
-
 
