@@ -12,10 +12,43 @@ enum POS: String {
     case OUTWEAR = "Outwear";
     case ACCESSORIES = "Accessories";
     case FULLBODY = "Fullbody";
+    
+    var id: String {self.rawValue}
+    
 }
 
 enum TYPE{
-    
+    // TOP
+    case T_SHIRT
+    case SHIRT
+    case SWEATER
+    case TOPS
+    case JUMPER_AND_CARDIGANS
+    case HOODIES_AND_SWEATSHIRTS
+    case ACTIVEWEAR
+    // Bottoms
+    case SKIRTS
+    case TROUSERS
+    case SHORTS
+    case JEANS
+    case ACTIVEWEAR
+    // Outwear
+    case COATS
+    case JACKETS
+    case CAPES
+    // Full body
+    case Dress
+    case JUMPSUITS
+    case SUITS
+    case WORKWEAR
+    case BODIES
+    case ACTIVEWEAR
+    case ROBES
+    // Accessories
+    case BAGS
+    case TIES
+    case SCARVES_AND_GLOVES
+    case SOCKS_AND_TI
 }
 
 enum COL{
