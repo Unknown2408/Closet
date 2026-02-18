@@ -1,77 +1,131 @@
-enum SEASON: String, CaseIterable {
-    case WINTER;
-    case SUMMER;
-    case FALLS;
-    case SPRING;
+import Foundation
+
+// 1. STAGIONI
+enum Season: String, CaseIterable, Codable {
+    case winter = "Inverno"
+    case summer = "Estate"
+    case falls = "Autunno" // Di solito è "Fall" o "Autumn"
+    case spring = "Primavera"
 }
 
-enum POS: String, CaseIterable {
-    case TOP = "Tops";
-    case BOTTOM = "Bottoms";
-    case FOOTWEAR = "Footwear";
-    case OUTWEAR = "Outwear";
-    case ACCESSORIES = "Accessories";
-    case FULLBODY = "Fullbody";
+// 2. POSIZIONE (Macro-Categorie)
+enum Position: String, CaseIterable, Codable, Identifiable {
+    case top = "Tops"
+    case bottom = "Bottoms"
+    case footwear = "Footwear"
+    case outwear = "Outwear" // O "Outerwear"
+    case accessories = "Accessories"
+    case fullbody = "Fullbody"
     
-    var id: String {self.rawValue}
-    
+    var id: String { self.rawValue }
 }
 
-enum TYPE: String, CaseIterable{
+// 3. TIPO DI CAPO (Micro-Categorie)
+enum ClothingType: String, CaseIterable, Codable, Identifiable {
     // TOP
-    case T_SHIRT
-    case SHIRT
-    case SWEATER
-    case TOPS
-    case JUMPER_AND_CARDIGANS
-    case HOODIES_AND_SWEATSHIRTS
-    case ACTIVEWEAR
+    case tShirt = "T-shirt"
+    case shirt = "Camicia"
+    case sweater = "Maglione"
+    // case TOPS (Rimosso: è ridondante avere una categoria generica dentro i tipi specifici)
+    case cardigan = "Cardigan"
+    case hoodie = "Felpa"
+    
     // Bottoms
-    case SKIRTS
-    case TROUSERS
-    case SHORTS
-    case JEANS
-    //case ACTIVEWEAR
+    case skirt = "Gonna"
+    case trousers = "Pantaloni"
+    case shorts = "Pantaloncini"
+    case jeans = "Jeans"
+    
     // Outwear
-    case COATS
-    case JACKETS
-    case CAPES
+    case coat = "Cappotto"
+    case jacket = "Giacca"
+    case cape = "Mantella"
+    
     // Full body
-    case Dress
-    case JUMPSUITS
-    case SUITS
-    case WORKWEAR
-    case BODIES
-    // case ACTIVEWEAR
-    case ROBES
+    case dress = "Abito"
+    case jumpsuit = "Tuta Intera"
+    case suit = "Completo"
+    case robe = "Accappatoio/Vestaglia"
+    
+    // Activewear (Caso speciale multi-ruolo)
+    case activewear = "Abbigliamento Sportivo"
+    case workwear = "Abbigliamento Lavoro"
+    
     // Accessories
-    case BAGS
-    case TIES
-    case SCARVES_AND_GLOVES
-    case SOCKS_AND_TIGHTS
-    case BELTS
+    case bag = "Borsa"
+    case tie = "Cravatta"
+    case scarf = "Sciarpa"
+    case belt = "Cintura"
+    case glasses = "Occhiali"
+    case hat = "Cappello"
+    case jewellery = "Gioielli"
+    
+    // Footwear
+    case flats = "Scarpe Basse"
+    case heels = "Tacchi"
+    case sandals = "Sandali"
+    case sneakers = "Sneakers"
+    case boots = "Stivali"
+    
+    var id: String { self.rawValue }
+    
+    // LOGICA CORRETTA DELLE POSIZIONI
+    var possiblePositions: [Position] {
+        switch self {
+        case .tShirt, .shirt, .sweater, .cardigan, .hoodie:
+            return [.top]
+            
+        case .skirt, .trousers, .shorts, .jeans:
+            return [.bottom]
+            
+        case .coat, .jacket, .cape:
+            return [.outwear] // CORRETTO (Era .BOTTOM prima)
+            
+        case .dress, .jumpsuit, .suit, .robe:
+            return [.fullbody]
+            
+        case .bag, .tie, .scarf, .belt, .glasses, .hat, .jewellery:
+            return [.accessories]
+            
+        case .flats, .heels, .sandals, .sneakers, .boots:
+            return [.footwear]
+            
+        case .activewear:
+            return [.top, .bottom, .fullbody] // Rimosso duplicato
+            
+        case .workwear:
+            return [.top, .bottom, .fullbody, .outwear]
+        }
+    }
 }
 
+// DA FARE
 enum COL: String, CaseIterable{
     case RED = "Red"
 }
 
 
 struct Cloth {
-    let position : POS
-    let type : TYPE
-    let season : SEASON
+    var id = UUID()
+    
+    var position : [Position]
+    let type : ClothingType
+    var season : [Season]
     
     var color: [COL]
-    var brand: [String]
+    var brand: String
     var style: [String]
-    var description: [String]
+    var description: String
 }
 
 struct Outfit{
+    var id = UUID()
     let outfit_name: String
-    var indument: [Cloth]
-    let favourite: Bool
+    
+    var items: [UUID]
+    
+    var favourite: Bool = false
+    var dateCrated: Date = Date()
 }
 
 
