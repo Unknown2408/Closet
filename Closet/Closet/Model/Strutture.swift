@@ -18,12 +18,17 @@ enum TYPE{
     
 }
 
+enum COL{
+    
+}
+
 
 struct Cloth {
-    let position : [POS]
-    let type : [TYPE]
-    let season : [SEASON]
+    let position : POS
+    let type : TYPE
+    let season : SEASON
     
+    var color: [COL]
     var brand: [String]
     var style: [String]
     var description: [String]
