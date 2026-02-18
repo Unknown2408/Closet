@@ -17,3 +17,13 @@ enum POS: String {
 enum TYPE{
     
 }
+
+
+struct cloth {
+    let position : [POS]
+    let type : [TYPE]
+    let season : [SEASON]
+    
+    let brand: [String]
+    let style: [String]
+}
