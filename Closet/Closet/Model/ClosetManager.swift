@@ -62,11 +62,11 @@ import SwiftUI
     // Gestione dei vestiti
     
     /// Aggiunta di un indumento all'inventario
-    func addItem(image: String, position: Position, type: ClothingType,  season: [Season], color: [Color], style: [String], brand: String, description: String ){
+    func addItem(image: String, position: Position, type: ClothingType,  season: [Season], coloreIndumento: [coloreIndumento], style: [String], brand: String, description: String ){
         // Rimuovo gli spazi vuori
         let cleanBrand = brand.trimmingCharacters(in: .whitespacesAndNewlines)
         // Creo l'oggetto
-        let newItem = Cloth(image: image, position: position, type: type, season: season, color: color, brand: cleanBrand, style: style, description: description)
+        let newItem = Cloth(image: image, position: position, type: type, season: season, coloreIndumentoRicerca: coloreIndumento, brand: cleanBrand, style: style, description: description)
         // inserisco nell'inventario
         inventory.append(newItem)
         save()

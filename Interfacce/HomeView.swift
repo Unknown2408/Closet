@@ -17,7 +17,9 @@ struct HomeView: View {
             // TAB 2: Visualizza la vista Outfit
             OutfitView()
                 .tabItem {
-                    Label("Outfit", systemImage: "tshirt")
+                    Image(systemName: "tshirt")
+                        .environment(\.symbolVariants, .none)
+                    Text("Outfit")
                 }
                 .tag(1)
             
@@ -26,7 +28,7 @@ struct HomeView: View {
                 .tabItem {
                     Label("Search", systemImage: "magnifyingglass")
                 }
-                .tag(0)
+                .tag(2)
             
         }
         .accentColor(.black)
@@ -35,103 +37,113 @@ struct HomeView: View {
 
 
 struct ClosetContentView: View {
+    @Environment(ClosetManager.self) private var manager
     @State private var showingAddItem = false
+    
+    // Configurazione griglia a 2 colonne
+    let columns = [
+        GridItem(.flexible(), spacing: 16),
+        GridItem(.flexible(), spacing: 16)
+    ]
+    
     var body: some View {
-        ZStack {
-            Color.white.ignoresSafeArea()
-            
-            VStack(alignment: .leading, spacing: 20) {
-                // Header: Welcome + Nome
-                VStack(alignment: .leading, spacing: 5) {
-                    
-                    HStack{
+        NavigationStack {
+            ZStack {
+                SwiftUI.Color.white.ignoresSafeArea()
+                
+                VStack(alignment: .leading, spacing: 0) {
+                    // Header: My Closet + Pulsante per aggiungere
+                    HStack {
                         Text("My closet")
-                            .font(.system(size: 40, weight: .bold, design: .default))
+                            .font(.system(size: 40, weight: .bold))
                             .foregroundColor(.black)
-                    
-                        Spacer() // Spinge il bottone tutto a destra (opzionale)
-
-                        Button(action: {
-                            
-                            showingAddItem = true
-                        }) {
-                            Image(systemName: "plus")
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.white)
-                                .frame(width: 44, height: 44)
-                                .background(
-                                    Circle()
-                                        .fill(Color.black.opacity(0.8))
-                                        .blur(radius: 0.5)
-                                )
-                        }
-                        // Questo "ascolta" quando showingAddItem diventa true e apre la vista
-                        .sheet(isPresented: $showingAddItem) {
-                            NewItemView()
-                        }
                         
+                        Spacer()
+                        
+                        Button(action: { showingAddItem = true }) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(.black)
+                        }
                     }
+                    .padding(.horizontal, 25)
+                    .padding(.top, 20)
                     
-                    
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 15) {
+                            Text("Featured")
+                                .font(.title2.bold())
+                                .padding(.top, 10)
+                            
+                            // Griglia con i dati reali del ClosetManager
+                            LazyVGrid(columns: columns, spacing: 20) {
+                                ForEach(manager.inventory) { item in
+                                    ClothCard(cloth: item)
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 25)
+                        .padding(.bottom, 20)
+                    }
                 }
-                .padding(.horizontal, 30)
-                .padding(.top)
-                
-                Spacer()
-                
-                // Pulsanti Funzioni
-                HStack(spacing: 25) {
-                    Spacer()
-                    
-                    // Lente di ingrandimento
-                    CircleButton(icon: "magnifyingglass") {
-                        print("Cerca")
-                    }
-                    
-                    // Più (per aggiungere)
-                    CircleButton(icon: "plus", isMain: true) {
-                        print("Aggiungi")
-                    }
-                    
-                    // Cestino
-                    CircleButton(icon: "trash") {
-                        print("Elimina")
-                    }
-                    
-                    Spacer()
-                }
-                .padding(.bottom, 50)
             }
-            
-            
+            .sheet(isPresented: $showingAddItem) {
+                NewItemView()
+            }
         }
     }
 }
 
-// Sottovista per i pulsanti rotondi
-struct CircleButton: View {
-    let icon: String
-    var isMain: Bool = false
-    var action: () -> Void
+struct ClothCard: View {
+    let cloth: Cloth
     
     var body: some View {
-        Button(action: action) {
+        VStack(alignment: .leading, spacing: 8) {
+            // Box Immagine (Sfondo grigio chiaro come da mockup)
             ZStack {
-                Circle()
-                    .fill(Color.white.opacity(0.1)) // Sfondo leggermente visibile
-                    .frame(width: isMain ? 80 : 65, height: isMain ? 80 : 65)
-                    .overlay(
-                        Circle().stroke(Color.white.opacity(0.5), lineWidth: 1)
-                    )
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(SwiftUI.Color.gray.opacity(0.1))
+                    .aspectRatio(0.85, contentMode: .fit)
                 
-                Image(systemName: icon)
-                    .font(.system(size: isMain ? 30 : 22, weight: .bold))
-                    .foregroundColor(.white)
+                // Caricamento immagine dal nome salvato
+                Image(cloth.image)
+                    .resizable()
+                    .scaledToFit()
+                    .padding(10)
+            }
+            
+            // Informazioni Capo
+            VStack(alignment: .leading, spacing: 2) {
+                Text(cloth.brand.uppercased())
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(.black)
+                    .lineLimit(1)
+                
+                Text(cloth.type.rawValue)
+                    .font(.system(size: 11))
+                    .foregroundColor(.gray)
+                    .lineLimit(1)
             }
         }
     }
 }
 
 #Preview {
-    HomeView()
+    // Creiamo un'istanza di test
+    let mockManager = ClosetManager()
+    
+    // Aggiungiamo un elemento di prova per vedere se la griglia funziona
+    mockManager.addItem(
+        image: "LogoApp", // Usa un'immagine che hai negli Assets
+        position: .top,
+        type: .tShirt,
+        season: [.summer],
+        coloreIndumento: [.RED],
+        style: ["Casual"],
+        brand: "Balmain",
+        description: "T-shirt di prova"
+    )
+    
+    return HomeView()
+        .environment(mockManager)
 }

@@ -104,7 +104,7 @@ enum ClothingType: String, CaseIterable, Codable, Identifiable {
 
 // DA FARE
 // Ho aggiunto Codable per poterlo salvare nel JSON insieme al vestito
-enum Color: String, CaseIterable, Codable {
+enum coloreIndumento: String, CaseIterable, Codable {
     case RED = "Red"
 }
 
@@ -121,7 +121,7 @@ struct Cloth: Identifiable, Codable {
     var position : Position
     var type : ClothingType
     var season : [Season]
-    var color: [Color]
+    var coloreIndumentoRicerca: [coloreIndumento]
     var brand: String
     var style: [String]
     var description: String
