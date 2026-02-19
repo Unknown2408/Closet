@@ -9,6 +9,8 @@ import SwiftUI
     public var inventory: [Cloth] = []
     /// Array in cui depositiamo gli outfit
     public var outfits: [Outfit] = []
+    /// Regole di abbinamento
+    var colorRules: [String: [String]] = [:]
     
     ///Definisco la cartella in cui andranno salvati i dati (da capire se serve effettivamente se usiamo già parthenokit)
     private var archiveURL: URL {
@@ -24,9 +26,32 @@ import SwiftUI
         var outfits: [Outfit]
     }
     
+    /// Carico il file json
+    func loadColorRules() -> [String: [String]] {
+        // 1. Uso 'guard let' per assicurarmi che l'URL esista senza forzare con il '!'
+        guard let url = Bundle.main.url(forResource: "ColorRules", withExtension: "json") else {
+            print("Errore: File ColorRules.json non trovato!")
+            return [:] // Restituisco un dizionario vuoto come piano B
+        }
+        
+        let decoder = JSONDecoder()
+        
+        // 2. Apro il do-catch e uso i 'try' normali (senza punto esclamativo)
+        do {
+            let data = try Data(contentsOf: url)
+            let colorRules = try decoder.decode([String: [String]].self, from: data)
+            return colorRules
+        } catch {
+            // 3. Se i dati sono illeggibili o il JSON è scritto male, catturo l'errore
+            print("Errore durante la decodifica dei colori: \(error)")
+            return [:] // Piano B anche qui
+        }
+    }
+    
     /// Inizializzatore
     init() {
         load() // Appena la classe viene creata, prova a caricare i dati
+        self.colorRules = loadColorRules()
     }
     
     /// Definisco la funzione save
@@ -62,7 +87,7 @@ import SwiftUI
     // Gestione dei vestiti
     
     /// Aggiunta di un indumento all'inventario
-    func addItem(image: String, position: Position, type: ClothingType,  season: [Season], coloreIndumento: [coloreIndumento], style: [String], brand: String, description: String ){
+    func addItem(image: Data, position: Position, type: ClothingType,  season: [Season], coloreIndumento: [coloreIndumento], style: [String], brand: String, description: String ){
         // Rimuovo gli spazi vuori
         let cleanBrand = brand.trimmingCharacters(in: .whitespacesAndNewlines)
         // Creo l'oggetto
@@ -134,5 +159,62 @@ import SwiftUI
         return inventory.filter { outfit.items.contains($0.id) }
     }
     
+    // COLOR MATCHING
+    /// Suggerisce capi compatibili con un outfit in costruzione
+    func getCascadingSuggestions(for selectedItems: [Cloth]) -> [Cloth] {
+        
+        // Se l'utente non ha ancora selezionato nulla, non suggeriamo niente
+        // (oppure potresti ritornare l'intero 'inventory')
+        guard !selectedItems.isEmpty else { return [] }
+        
+        // 1. ELIMINIAMO I DOPPIONI: Capiamo quali parti del corpo sono già "vestite"
+        // Creiamo un array con le posizioni (Top, Bottom, ecc.) già presenti nell'outfit
+        let occupiedPositions = selectedItems.map { $0.position }
+        
+        // 2. TROVIAMO I COLORI IN COMUNE (L'Intersezione)
+        var commonValidColors: Set<String> = []
+        
+        // Prendiamo i colori compatibili con il PRIMO capo selezionato
+        if let firstItem = selectedItems.first,
+           let firstColor = firstItem.coloreIndumentoRicerca.first {
+            let compatibleWithFirst = colorRules[firstColor.rawValue] ?? []
+            commonValidColors = Set(compatibleWithFirst)
+        }
+        
+        // Ora cicliamo sui capi successivi (se ci sono) e restringiamo il cerchio
+        // dropFirst() salta il primo capo che abbiamo già analizzato
+        // Ora cicliamo sui capi successivi (se ci sono) e restringiamo il cerchio
+        for item in selectedItems.dropFirst() {
+                
+            if let color = item.coloreIndumentoRicerca.first {
+                // 1. Diciamo esplicitamente a Swift che questa è una Stringa
+                let colorString: String = color.rawValue
+                
+                // 2. Estraiamo l'array dal dizionario. Se non c'è, restituiamo un array di stringhe vuoto
+                let arrayColoriCompatibili: [String] = colorRules[colorString] ?? []
+                    
+                // 3. Convertiamo l'array in un Set in modo esplicito
+                let compatibleWithItem: Set<String> = Set(arrayColoriCompatibili)
+                    
+                // 4. Facciamo l'intersezione matematica
+                commonValidColors.formIntersection(compatibleWithItem)
+            }
+        }
+        
+        // 3. FILTRIAMO L'INVENTARIO
+        let suggestions = inventory.filter { item in
+            // Regola A: Il capo non deve coprire una parte del corpo già vestita
+            let isPositionFree = !occupiedPositions.contains(item.position)
+            
+            // Regola B: Il capo deve avere un colore che rientra nei "commonValidColors"
+            let hasValidColor = item.coloreIndumentoRicerca.contains { color in
+                commonValidColors.contains(color.rawValue)
+            }
+            
+            return isPositionFree && hasValidColor
+        }
+        
+        return suggestions
+    }
+    
 }
-

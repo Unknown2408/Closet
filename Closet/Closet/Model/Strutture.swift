@@ -103,9 +103,22 @@ enum ClothingType: String, CaseIterable, Codable, Identifiable {
 }
 
 // DA FARE
-// Ho aggiunto Codable per poterlo salvare nel JSON insieme al vestito
 enum coloreIndumento: String, CaseIterable, Codable {
-    case RED = "Red"
+    // Neutri
+    case black = "Black"
+    case white = "White"
+    case grey = "Grey"
+    case navy = "Navy"
+    case beige = "Beige"
+    case brown = "Brown"
+    
+    // Colori
+    case red = "Red"
+    case blue = "Blue"
+    case green = "Green"
+    case pink = "Pink"
+    case burgundy = "Burgundy"
+    case yellow = "Yellow"
 }
 
 
@@ -115,7 +128,7 @@ struct Cloth: Identifiable, Codable {
     var id = UUID()
     
     // immagine associata
-    var image: String
+    var image: Data
     
     // variabili per la ricerca
     var position : Position
@@ -138,4 +151,3 @@ struct Outfit: Identifiable, Codable {
     var favourite: Bool = false
     var dateCreated: Date = Date()
 }
-

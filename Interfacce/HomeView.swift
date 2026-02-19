@@ -54,7 +54,7 @@ struct ClosetContentView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     // Header: My Closet + Pulsante per aggiungere
                     HStack {
-                        Text("My closet")
+                        Text("My Closet")
                             .font(.system(size: 40, weight: .bold))
                             .foregroundColor(.black)
                         
@@ -78,7 +78,12 @@ struct ClosetContentView: View {
                             // Griglia con i dati reali del ClosetManager
                             LazyVGrid(columns: columns, spacing: 20) {
                                 ForEach(manager.inventory) { item in
-                                    ClothCard(cloth: item)
+                                    // Avvolgiamo la Card in un NavigationLink
+                                    NavigationLink(destination: DetailView(cloth: item)) {
+                                        ClothCard(cloth: item)
+                                    }
+                                    // Questo serve a evitare che i testi diventino blu/grigi cliccabili
+                                    .buttonStyle(PlainButtonStyle())
                                 }
                             }
                         }
@@ -99,17 +104,24 @@ struct ClothCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // Box Immagine (Sfondo grigio chiaro come da mockup)
+            // Box Immagine
             ZStack {
                 RoundedRectangle(cornerRadius: 12)
                     .fill(SwiftUI.Color.gray.opacity(0.1))
                     .aspectRatio(0.85, contentMode: .fit)
                 
-                // Caricamento immagine dal nome salvato
-                Image(cloth.image)
-                    .resizable()
-                    .scaledToFit()
-                    .padding(10)
+                // LOGICA AGGIORNATA PER DATA -> IMAGE
+                if let uiImage = UIImage(data: cloth.image) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFit()
+                        .padding(10)
+                } else {
+                    // Placeholder nel caso i dati siano corrotti o mancanti
+                    Image(systemName: "tshirt.fill")
+                        .foregroundColor(.gray.opacity(0.3))
+                        .font(.largeTitle)
+                }
             }
             
             // Informazioni Capo
@@ -129,21 +141,6 @@ struct ClothCard: View {
 }
 
 #Preview {
-    // Creiamo un'istanza di test
-    let mockManager = ClosetManager()
-    
-    // Aggiungiamo un elemento di prova per vedere se la griglia funziona
-    mockManager.addItem(
-        image: "LogoApp", // Usa un'immagine che hai negli Assets
-        position: .top,
-        type: .tShirt,
-        season: [.summer],
-        coloreIndumento: [.RED],
-        style: ["Casual"],
-        brand: "Balmain",
-        description: "T-shirt di prova"
-    )
-    
-    return HomeView()
-        .environment(mockManager)
+    HomeView()
+        .environment(ClosetManager())
 }

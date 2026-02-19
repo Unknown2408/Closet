@@ -1,0 +1,15 @@
+{
+  "Black": ["White", "Grey", "Beige", "Red", "Blue", "Green", "Pink"],
+  "White": ["Black", "Navy", "Beige", "Brown", "Grey", "Red", "Green", "Blue", "Pink", "Burgundy", "Yellow"],
+  "Grey": ["Black", "White", "Navy", "Burgundy", "Pink", "Blue", "Red"],
+  "Navy": ["White", "Beige", "Grey", "Brown", "Burgundy", "Green", "Red", "Yellow"],
+  "Beige": ["Navy", "White", "Black", "Brown", "Green", "Red", "Burgundy", "Blue"],
+  "Brown": ["White", "Beige", "Navy", "Green", "Yellow", "Burgundy"],
+  
+  "Red": ["Black", "White", "Navy", "Beige", "Grey"],
+  "Blue": ["White", "Beige", "Black", "Grey", "Brown"],
+  "Green": ["White", "Beige", "Brown", "Navy", "Black", "Grey"],
+  "Pink": ["White", "Grey", "Navy", "Black", "Beige"],
+  "Burgundy": ["Navy", "Grey", "White", "Black", "Beige", "Brown"],
+  "Yellow": ["Navy", "Grey", "White", "Black", "Brown", "Beige"]
+}
