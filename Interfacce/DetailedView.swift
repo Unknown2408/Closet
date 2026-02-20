@@ -1,30 +1,27 @@
-//
-//  DetailedView.swift
-//  Closet
-//
-//  Created by Nitharsan on 19/02/26.
-//
-
 import SwiftUI
 
 struct DetailView: View {
     let cloth: Cloth
+    var onDelete: () -> Void
     
+    @Environment(\.dismiss)
+    var dismiss
     var body: some View {
         VStack {
             // 1. Menu con tre puntini in alto a destra
             HStack {
                 Spacer()
                 Menu {
-                    Button(action: {
-                        // Azione per modificare
-                    }) {
+                    Button(action: {/Modify/}) {
                         Label("Modify", systemImage: "pencil")
                     }
                     
-                    Button(role: .destructive, action: {
+                    Button(role: .destructive, action:
+                    {
+                        onDelete()
+                        dismiss()
                         // Azione per eliminare
-                    }) {
+                         }) {
                         Label("Delete", systemImage: "trash")
                     }
                 } label: {
@@ -76,9 +73,7 @@ struct DetailView: View {
             .padding(.bottom, 10)
         }
         // I modificatori devono stare qui, dopo la chiusura della VStack
-        .navigationTitle("Details")
+        .navigationTitle("Dettaglio")
         .navigationBarTitleDisplayMode(.inline)
     }
 }
-
-

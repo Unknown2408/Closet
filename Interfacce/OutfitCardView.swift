@@ -69,7 +69,7 @@ struct OutfitCardView: View {
                     .font(.headline)
                     .lineLimit(1) // Tronca il testo se è troppo lungo
                 
-                Text("\(outfit.items.count) capi")
+                Text("\(outfit.items.count) items")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }

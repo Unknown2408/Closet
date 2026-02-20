@@ -1,11 +1,3 @@
-//
-//  NewItemView.swift
-//  Closet
-//
-//  Created by Nitharsan on 19/02/26.
-//
-
-
 import SwiftUI
 import UIKit
 
@@ -36,12 +28,12 @@ struct NewItemView: View {
     
     let styles = ["Casual", "Elegante", "Sportivo", "Streetwear"]
     let uiColors: [String: Color] = [
-        "WHITE": .white, "GREY": .gray, "BLACK": .black,
-        "RED": .red, "BURGUNDY": Color(red: 0.5, green: 0, blue: 0),
-        "PINK": .pink, "YELLOW": .yellow,
-        "GREEN": .green, "BLUE": .blue, "NAVY": Color(red: 0, green: 0, blue: 0.5),
-        "BROWN": .brown, "BEIGE": Color(red: 0.96, green: 0.96, blue: 0.86)
-    ]
+            "WHITE": .white, "LIGHT GRAY": Color(white: 0.8), "GRAY": .gray, "DARK GRAY": Color(white: 0.2), "BLACK": .black,
+            "RED": .red, "MAROON": Color(red: 0.5, green: 0, blue: 0), "ORANGE": .orange, "BEIGE": Color(red: 0.96, green: 0.96, blue: 0.86), "YELLOW": .yellow,
+            "GREEN": .green, "OLIVE": Color(red: 0.5, green: 0.5, blue: 0), "BLUE": .blue, "NAVY": Color(red: 0, green: 0, blue: 0.5), "PURPLE": .purple,
+            "PINK": .pink, "BROWN": .brown, "CYAN": .cyan, "TEAL": Color(red: 0, green: 0.5, blue: 0.5), "MAGENTA": Color(red: 1, green: 0, blue: 1)
+        ]
+    
     let columns = [GridItem(.adaptive(minimum: 50))]
 
     var body: some View {
@@ -219,8 +211,8 @@ struct NewItemView: View {
     // MARK: - Helper Functions
     
     func isColorDark(_ colorName: String) -> Bool {
-        let darkColors = ["BLACK", "NAVY", "BURGUNDY", "BROWN"]
-        return darkColors.contains(colorName)
+            let darkColors = ["BLACK", "NAVY", "DARK GRAY", "PURPLE", "MAROON", "BROWN", "MAGENTA", "TEAL", "OLIVE"]
+            return darkColors.contains(colorName)
     }
     
     func saveCloth() {
@@ -235,21 +227,29 @@ struct NewItemView: View {
         }
         
         let finalColor: coloreIndumento
-        switch selectedColorUI {
-        case "WHITE": finalColor = .white
-        case "BLACK": finalColor = .black
-        case "GREY": finalColor = .grey
-        case "RED": finalColor = .red
-        case "BLUE": finalColor = .blue
-        case "NAVY": finalColor = .navy
-        case "GREEN": finalColor = .green
-        case "PINK": finalColor = .pink
-        case "BURGUNDY": finalColor = .burgundy
-        case "YELLOW": finalColor = .yellow
-        case "BROWN": finalColor = .brown
-        case "BEIGE": finalColor = .beige
-        default: finalColor = .black
-        }
+                switch selectedColorUI {
+                case "WHITE": finalColor = .white
+                case "LIGHT GRAY": finalColor = .lightGray
+                case "GRAY": finalColor = .gray
+                case "DARK GRAY": finalColor = .darkGray
+                case "BLACK": finalColor = .black
+                case "BEIGE": finalColor = .beige
+                case "BROWN": finalColor = .brown
+                case "RED": finalColor = .red
+                case "MAROON": finalColor = .maroon
+                case "ORANGE": finalColor = .orange
+                case "YELLOW": finalColor = .yellow
+                case "GREEN": finalColor = .green
+                case "OLIVE": finalColor = .olive
+                case "TEAL": finalColor = .teal
+                case "CYAN": finalColor = .cyan
+                case "BLUE": finalColor = .blue
+                case "NAVY": finalColor = .navy
+                case "PURPLE": finalColor = .purple
+                case "MAGENTA": finalColor = .magenta
+                case "PINK": finalColor = .pink
+                default: finalColor = .black
+                }
 
         manager.addItem(
             image: finalImageData,

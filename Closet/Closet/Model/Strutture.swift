@@ -102,25 +102,38 @@ enum ClothingType: String, CaseIterable, Codable, Identifiable {
     }
 }
 
-// DA FARE
+// 4. COLORI (Espanso a 20 colori per combaciare con la UI)
 enum coloreIndumento: String, CaseIterable, Codable {
-    // Neutri
-    case black = "Black"
+    // Scala di grigi e neutri
     case white = "White"
-    case grey = "Grey"
-    case navy = "Navy"
+    case lightGray = "Light Gray"
+    case gray = "Gray"
+    case darkGray = "Dark Gray"
+    case black = "Black"
+    
+    // Marroni e Beige
     case beige = "Beige"
     case brown = "Brown"
     
-    // Colori
+    // Rossi, Rosa e Viola
     case red = "Red"
-    case blue = "Blue"
-    case green = "Green"
+    case maroon = "Maroon"
     case pink = "Pink"
-    case burgundy = "Burgundy"
+    case purple = "Purple"
+    case magenta = "Magenta"
+    
+    // Gialli e Arancioni
+    case orange = "Orange"
     case yellow = "Yellow"
+    
+    // Verdi e Blu
+    case green = "Green"
+    case olive = "Olive"
+    case teal = "Teal"
+    case cyan = "Cyan"
+    case blue = "Blue"
+    case navy = "Navy"
 }
-
 
 // Ho aggiunto Identifiable (per le liste UI) e Codable (per il salvataggio)
 struct Cloth: Identifiable, Codable {

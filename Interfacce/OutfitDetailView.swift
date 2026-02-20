@@ -7,7 +7,7 @@ struct OutfitDetailView: View {
     // Per tornare indietro automaticamente quando cancelliamo l'outfit
     @Environment(\.dismiss) var dismiss
     
-    // Passiamo l'ID anziché tutto l'outfit. È più sicuro per i dati dinamici!
+    // Passiamo l'ID anziché tutto l'outfit. È più sicuro per i dati dinamici!
     let outfitId: UUID
     
     // Variabile per mostrare l'avviso di eliminazione
@@ -29,8 +29,8 @@ struct OutfitDetailView: View {
                             .font(.largeTitle)
                             .fontWeight(.bold)
                         
-                        // Formattiamo la data in modo leggibile (es. "12 Ott 2024, 15:30")
-                        Text("Creato il \(outfit.dateCreated.formatted(date: .abbreviated, time: .shortened))")
+                        // Formattiamo la data in modo leggibile
+                        Text("Created on \(outfit.dateCreated.formatted(date: .abbreviated, time: .shortened))")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
@@ -38,7 +38,7 @@ struct OutfitDetailView: View {
                     .padding(.top)
                     
                     // 2. GRIGLIA DEI VESTITI
-                    Text("Capi in questo outfit (\(clothes.count))")
+                    Text("Items in this outfit (\(clothes.count))")
                         .font(.headline)
                         .padding(.horizontal)
                     
@@ -80,18 +80,18 @@ struct OutfitDetailView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
-                        // Tasto Modifica (Per ora stampa in console, lo faremo dopo)
+                        // Tasto Modifica
                         Button {
-                            print("Apri schermata di modifica")
+                            print("Open edit screen")
                         } label: {
-                            Label("Modifica", systemImage: "pencil")
+                            Label("Edit", systemImage: "pencil")
                         }
                         
                         // Tasto Elimina (Rosso distruttivo)
                         Button(role: .destructive) {
                             showingDeleteAlert = true
                         } label: {
-                            Label("Elimina Outfit", systemImage: "trash")
+                            Label("Delete Outfit", systemImage: "trash")
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
@@ -99,19 +99,19 @@ struct OutfitDetailView: View {
                 }
             }
             // 4. ALERT DI CONFERMA ELIMINAZIONE
-            .alert("Elimina Outfit", isPresented: $showingDeleteAlert) {
-                Button("Annulla", role: .cancel) { }
-                Button("Elimina", role: .destructive) {
+            .alert("Delete Outfit", isPresented: $showingDeleteAlert) {
+                Button("Cancel", role: .cancel) { }
+                Button("Delete", role: .destructive) {
                     closetManager.deleteOutfit(id: outfit.id)
                     dismiss() // Chiude la vista di dettaglio e torna alla griglia!
                 }
             } message: {
-                Text("Sei sicuro di voler eliminare questo abbinamento? I vestiti rimarranno comunque nel tuo armadio.")
+                Text("Are you sure you want to delete this outfit? The clothes will still remain in your closet.")
             }
             
         } else {
             // Se non trova l'outfit (es. appena eliminato)
-            Text("Outfit non trovato.")
+            Text("Outfit not found.")
         }
     }
 }

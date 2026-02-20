@@ -19,9 +19,9 @@ struct OutfitsView: View {
                 // CONTROLLO EMPTY STATE: Se non ci sono outfit, mostriamo un bel messaggio
                 if closetManager.outfits.isEmpty {
                     ContentUnavailableView(
-                        "Nessun Outfit",
+                        "No Outfits",
                         systemImage: "hanger",
-                        description: Text("Tocca l'icona in alto a destra per creare il tuo primo abbinamento!")
+                        description: Text("Tap the icon in the top right to create your first outfit!")
                     )
                     .padding(.top, 50)
                 } else {
@@ -38,7 +38,7 @@ struct OutfitsView: View {
                     .padding()
                 }
             }
-            .navigationTitle("I Miei Outfit")
+            .navigationTitle("My Outfits")
             // 4. TOOLBAR E MENU A TENDINA
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -47,14 +47,14 @@ struct OutfitsView: View {
                         Button {
                             isShowingCreateOutfit = true
                         } label: {
-                            Label("Crea Nuovo Outfit", systemImage: "plus")
+                            Label("Create New Outfit", systemImage: "plus")
                         }
                         
                         // Pulsante 2: Modifica (per abilitare cancellazioni o riordino)
                         Button {
-                            print("Modalità modifica da implementare")
+                            print("Edit mode to be implemented")
                         } label: {
-                            Label("Modifica", systemImage: "pencil")
+                            Label("Edit", systemImage: "pencil")
                         }
                     } label: {
                         // L'icona del menù visibile all'utente (i 3 puntini)
