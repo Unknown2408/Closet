@@ -15,7 +15,7 @@ struct HomeView: View {
                 .tag(0)
             
             // TAB 2: Visualizza la vista Outfit
-            OutfitView()
+            OutfitsView()
                 .tabItem {
                     Image(systemName: "tshirt")
                         .environment(\.symbolVariants, .none)

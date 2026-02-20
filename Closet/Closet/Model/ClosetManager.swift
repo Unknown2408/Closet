@@ -131,7 +131,7 @@ import SwiftUI
     
     /// Aggiunta outfit
     func addOutfit(name: String, items: [UUID]){
-        var newOutfit = Outfit(outfitName: name, items: items)
+        let newOutfit = Outfit(outfitName: name, items: items)
         outfits.append(newOutfit)
         save()
     }
