@@ -12,18 +12,22 @@ import UIKit
 struct NewItemView: View {
     // MARK: - State Properties
     @State private var description: String = ""
-    @State private var brand: String = ""
     
-    // Usiamo direttamente i tuoi Enum come stato iniziale!
     @State private var selectedPosition: Position = .top
     @State private var selectedType: ClothingType = .tShirt
     @State private var selectedSeason: Season = .summer
     @State private var selectedStyle: String = "Casual"
     
-    // Gestione Colore (usiamo la stringa maiuscola per l'interfaccia visiva)
+    // BRAND DINAMICO
+    @State private var selectedBrand: String = "Unbranded"
+    @State private var previousBrand: String = "Unbranded" // Salva la scelta precedente in caso di annullamento
+    @State private var showingAddBrandAlert = false
+    @State private var newBrandName = ""
+    let addNewBrandOption = "+ Aggiungi ..."
+    
     @State private var selectedColorUI: String = ""
     
-    // Gestione Foto
+    // FOTO
     @State private var selectedImage: UIImage? = nil
     @State private var showCamera = false
     
@@ -31,8 +35,6 @@ struct NewItemView: View {
     @Environment(\.dismiss) var dismiss
     
     let styles = ["Casual", "Elegante", "Sportivo", "Streetwear"]
-    
-    // Colori visivi per l'interfaccia utente (Griglia)
     let uiColors: [String: Color] = [
         "WHITE": .white, "GREY": .gray, "BLACK": .black,
         "RED": .red, "BURGUNDY": Color(red: 0.5, green: 0, blue: 0),
@@ -45,12 +47,12 @@ struct NewItemView: View {
     var body: some View {
         NavigationStack {
             Form {
-                // 1. Nome
+                // 1. NOME
                 Section(header: Text("NOME")) {
                     TextField("Esempio: Camicia di lino", text: $description)
                 }
                 
-                // 2. Add Photo (OPZIONALE)
+                // 2. FOTO (Opzionale)
                 Section {
                     Button(action: {
                         showCamera = true
@@ -62,7 +64,6 @@ struct NewItemView: View {
                         .frame(maxWidth: .infinity)
                         .foregroundColor(.primary)
                     }
-                    // ORA SI APRE A TUTTO SCHERMO
                     .fullScreenCover(isPresented: $showCamera) {
                         CameraPicker(image: $selectedImage)
                             .ignoresSafeArea()
@@ -78,43 +79,38 @@ struct NewItemView: View {
                     }
                 }
                 
-                // 3. Posizione e Tipo (DIPENDENTI)
+                // 3. CATEGORIA
                 Section(header: Text("CATEGORIA")) {
-                    // Selezione MACRO
                     Picker("Posizione", selection: $selectedPosition) {
                         ForEach(Position.allCases) { position in
                             Text(position.rawValue).tag(position)
                         }
                     }
-                    // Quando la posizione cambia, forziamo il reset del tipo
-                    .onChange(of: selectedPosition) { newPosition in
+                    .onChange(of: selectedPosition) { _, newPosition in
                         // Cerca il primo tipo valido per questa nuova posizione e selezionalo
                         if let firstValidType = ClothingType.allCases.first(where: { $0.possiblePositions.contains(newPosition) }) {
                             selectedType = firstValidType
                         }
                     }
                     
-                    // Selezione MICRO (Filtrata dinamicamente)
                     Picker("Tipo", selection: $selectedType) {
-                        // Filtriamo i tipi che appartengono alla Position selezionata
                         let tipiFiltrati = ClothingType.allCases.filter { type in
                             type.possiblePositions.contains(selectedPosition)
                         }
-                        
                         ForEach(tipiFiltrati) { type in
                             Text(type.rawValue).tag(type)
                         }
                     }
                 }
                 
-                // 4. Style
+                // 4. STYLE
                 Section(header: Text("STYLE")) {
                     Picker("Seleziona", selection: $selectedStyle) {
                         ForEach(styles, id: \.self) { Text($0) }
                     }
                 }
                 
-                // 5. Colore
+                // 5. COLORE
                 Section(header: Text("COLORE: \(selectedColorUI)")) {
                     LazyVGrid(columns: columns, spacing: 15) {
                         ForEach(Array(uiColors.keys).sorted(), id: \.self) { colorName in
@@ -138,15 +134,32 @@ struct NewItemView: View {
                     .padding(.vertical, 10)
                 }
                 
-                // 6. Brand
+                // 6. BRAND (Unito in un solo Picker)
                 Section(header: Text("BRAND")) {
-                    TextField("Esempio: Nike, Zara...", text: $brand)
+                    Picker("Seleziona", selection: $selectedBrand) {
+                        // 1. Mostriamo tutti i brand salvati
+                        ForEach(manager.brands, id: \.self) { brandName in
+                            Text(brandName).tag(brandName)
+                        }
+                        
+                        Divider() // Crea una linea di separazione visiva carina
+                        
+                        // 2. Aggiungiamo la voce speciale alla fine
+                        Text(addNewBrandOption).tag(addNewBrandOption)
+                    }
+                    // Intercettiamo il cambio di selezione
+                    .onChange(of: selectedBrand) { _, newValue in
+                        if newValue == addNewBrandOption {
+                            showingAddBrandAlert = true // Apre il popup
+                        } else {
+                            previousBrand = newValue // Salviamo la scelta valida
+                        }
+                    }
                 }
                 
-                // 7. Season
+                // 7. SEASON
                 Section(header: Text("SEASON")) {
                     Picker("Stagione", selection: $selectedSeason) {
-                        // Usa l'Enum Season reale!
                         ForEach(Season.allCases, id: \.self) { season in
                             Text(season.rawValue).tag(season)
                         }
@@ -154,7 +167,7 @@ struct NewItemView: View {
                     .pickerStyle(.segmented)
                 }
                 
-                // Pulsante Salva
+                // PULSANTE SALVA
                 Section {
                     Button(action: {
                         saveCloth()
@@ -173,6 +186,33 @@ struct NewItemView: View {
             }
             .navigationTitle("Aggiungi Capo")
             .navigationBarItems(leading: Button("Annulla") { dismiss() })
+            
+            // ALERT: Aggiunta nuovo brand
+            .alert("Nuovo Brand", isPresented: $showingAddBrandAlert) {
+                TextField("Nome brand", text: $newBrandName)
+                
+                Button("Annulla", role: .cancel) {
+                    // Se annulla, rimettiamo il brand che c'era prima
+                    selectedBrand = previousBrand
+                    newBrandName = ""
+                }
+                
+                Button("Aggiungi") {
+                    let cleanName = newBrandName.trimmingCharacters(in: .whitespacesAndNewlines).capitalized
+                    if !cleanName.isEmpty {
+                        manager.addNewBrand(cleanName)
+                        // Imposta il brand creato come quello selezionato
+                        selectedBrand = cleanName
+                        previousBrand = cleanName
+                    } else {
+                        // Se ha lasciato vuoto, torniamo a quello precedente
+                        selectedBrand = previousBrand
+                    }
+                    newBrandName = ""
+                }
+            } message: {
+                Text("Inserisci il nome del brand da aggiungere alla lista.")
+            }
         }
     }
     
@@ -184,7 +224,7 @@ struct NewItemView: View {
     }
     
     func saveCloth() {
-        // 1. Gestione Immagine
+        // ... (IL RESTO DI saveCloth() RIMANE IDENTICO A PRIMA) ...
         let finalImageData: Data
         if let uiImage = selectedImage, let data = uiImage.jpegData(compressionQuality: 0.7) {
             finalImageData = data
@@ -194,7 +234,6 @@ struct NewItemView: View {
             finalImageData = placeholder?.jpegData(compressionQuality: 0.1) ?? Data()
         }
         
-        // 2. MAPPING COLORE (Dalla UI String al tuo Enum coloreIndumento)
         let finalColor: coloreIndumento
         switch selectedColorUI {
         case "WHITE": finalColor = .white
@@ -212,8 +251,6 @@ struct NewItemView: View {
         default: finalColor = .black
         }
 
-        // 3. Chiamata al Manager
-        // Passiamo direttamente gli @State (che ora sono già i tuoi Enum!)
         manager.addItem(
             image: finalImageData,
             position: selectedPosition,
@@ -221,7 +258,7 @@ struct NewItemView: View {
             season: [selectedSeason],
             coloreIndumento: [finalColor],
             style: [selectedStyle],
-            brand: brand,
+            brand: selectedBrand, // Salva correttamente il brand!
             description: description
         )
         
@@ -230,6 +267,7 @@ struct NewItemView: View {
 }
 
 // MARK: - Camera Picker
+// ... (CameraPicker rimane identico)
 struct CameraPicker: UIViewControllerRepresentable {
     @Binding var image: UIImage?
     @Environment(\.dismiss) var dismiss

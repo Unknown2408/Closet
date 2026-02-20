@@ -76,7 +76,7 @@ struct DetailView: View {
             .padding(.bottom, 10)
         }
         // I modificatori devono stare qui, dopo la chiusura della VStack
-        .navigationTitle("Dettaglio")
+        .navigationTitle("Details")
         .navigationBarTitleDisplayMode(.inline)
     }
 }
