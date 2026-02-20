@@ -12,29 +12,34 @@ import UIKit
 struct NewItemView: View {
     // MARK: - State Properties
     @State private var description: String = ""
-    @State private var selectedCategory: String = "T-Shirts"
-    @State private var selectedStyle: String = "Casual"
-    @State private var selectedColor: String = ""
     @State private var brand: String = ""
-    @State private var selectedSeason: String = "Summer"
+    
+    // Usiamo direttamente i tuoi Enum come stato iniziale!
+    @State private var selectedPosition: Position = .top
+    @State private var selectedType: ClothingType = .tShirt
+    @State private var selectedSeason: Season = .summer
+    @State private var selectedStyle: String = "Casual"
+    
+    // Gestione Colore (usiamo la stringa maiuscola per l'interfaccia visiva)
+    @State private var selectedColorUI: String = ""
+    
+    // Gestione Foto
     @State private var selectedImage: UIImage? = nil
     @State private var showCamera = false
     
-    // Accediamo al manager reale (Sostituisci ClosetManager con il tuo se diverso)
     @Environment(ClosetManager.self) private var manager
     @Environment(\.dismiss) var dismiss
     
-    let categories = ["T-Shirts", "Shirt", "Pants", "Top", "Gonna", "Footwear", "Outwear"]
     let styles = ["Casual", "Elegante", "Sportivo", "Streetwear"]
-    let seasons = ["Spring", "Summer", "Autumn", "Winter"]
     
-    let colors: [String: Color] = [
-        "WHITE": .white, "LIGHT GRAY": Color(white: 0.8), "GRAY": .gray, "DARK GRAY": Color(white: 0.2), "BLACK": .black,
-        "RED": .red, "MAROON": Color(red: 0.5, green: 0, blue: 0), "ORANGE": .orange, "BEIGE": Color(red: 0.96, green: 0.96, blue: 0.86), "YELLOW": .yellow,
-        "GREEN": .green, "OLIVE": Color(red: 0.5, green: 0.5, blue: 0), "BLUE": .blue, "NAVY": Color(red: 0, green: 0, blue: 0.5), "PURPLE": .purple,
-        "PINK": .pink, "BROWN": .brown, "CYAN": .cyan, "TEAL": Color(red: 0, green: 0.5, blue: 0.5), "MAGENTA": Color(red: 1, green: 0, blue: 1)
+    // Colori visivi per l'interfaccia utente (Griglia)
+    let uiColors: [String: Color] = [
+        "WHITE": .white, "GREY": .gray, "BLACK": .black,
+        "RED": .red, "BURGUNDY": Color(red: 0.5, green: 0, blue: 0),
+        "PINK": .pink, "YELLOW": .yellow,
+        "GREEN": .green, "BLUE": .blue, "NAVY": Color(red: 0, green: 0, blue: 0.5),
+        "BROWN": .brown, "BEIGE": Color(red: 0.96, green: 0.96, blue: 0.86)
     ]
-    
     let columns = [GridItem(.adaptive(minimum: 50))]
 
     var body: some View {
@@ -45,7 +50,7 @@ struct NewItemView: View {
                     TextField("Esempio: Camicia di lino", text: $description)
                 }
                 
-                // 2. Add Photo (ORA OPZIONALE)
+                // 2. Add Photo (OPZIONALE)
                 Section {
                     Button(action: {
                         showCamera = true
@@ -57,7 +62,8 @@ struct NewItemView: View {
                         .frame(maxWidth: .infinity)
                         .foregroundColor(.primary)
                     }
-                    .sheet(isPresented: $showCamera) {
+                    // ORA SI APRE A TUTTO SCHERMO
+                    .fullScreenCover(isPresented: $showCamera) {
                         CameraPicker(image: $selectedImage)
                             .ignoresSafeArea()
                     }
@@ -72,10 +78,32 @@ struct NewItemView: View {
                     }
                 }
                 
-                // 3. Categoria
+                // 3. Posizione e Tipo (DIPENDENTI)
                 Section(header: Text("CATEGORIA")) {
-                    Picker("Seleziona", selection: $selectedCategory) {
-                        ForEach(categories, id: \.self) { Text($0) }
+                    // Selezione MACRO
+                    Picker("Posizione", selection: $selectedPosition) {
+                        ForEach(Position.allCases) { position in
+                            Text(position.rawValue).tag(position)
+                        }
+                    }
+                    // Quando la posizione cambia, forziamo il reset del tipo
+                    .onChange(of: selectedPosition) { newPosition in
+                        // Cerca il primo tipo valido per questa nuova posizione e selezionalo
+                        if let firstValidType = ClothingType.allCases.first(where: { $0.possiblePositions.contains(newPosition) }) {
+                            selectedType = firstValidType
+                        }
+                    }
+                    
+                    // Selezione MICRO (Filtrata dinamicamente)
+                    Picker("Tipo", selection: $selectedType) {
+                        // Filtriamo i tipi che appartengono alla Position selezionata
+                        let tipiFiltrati = ClothingType.allCases.filter { type in
+                            type.possiblePositions.contains(selectedPosition)
+                        }
+                        
+                        ForEach(tipiFiltrati) { type in
+                            Text(type.rawValue).tag(type)
+                        }
                     }
                 }
                 
@@ -87,23 +115,23 @@ struct NewItemView: View {
                 }
                 
                 // 5. Colore
-                Section(header: Text("COLORE: \(selectedColor)")) {
+                Section(header: Text("COLORE: \(selectedColorUI)")) {
                     LazyVGrid(columns: columns, spacing: 15) {
-                        ForEach(Array(colors.keys).sorted(), id: \.self) { colorName in
+                        ForEach(Array(uiColors.keys).sorted(), id: \.self) { colorName in
                             ZStack {
                                 Circle()
-                                    .fill(colors[colorName]!)
+                                    .fill(uiColors[colorName]!)
                                     .frame(width: 44, height: 44)
                                     .overlay(Circle().stroke(Color.gray.opacity(0.3), lineWidth: 1))
                                 
-                                if selectedColor == colorName {
+                                if selectedColorUI == colorName {
                                     Image(systemName: "checkmark")
                                         .foregroundColor(isColorDark(colorName) ? .white : .black)
                                         .font(.system(size: 14, weight: .bold))
                                 }
                             }
                             .onTapGesture {
-                                self.selectedColor = colorName.uppercased()
+                                self.selectedColorUI = colorName.uppercased()
                             }
                         }
                     }
@@ -118,7 +146,10 @@ struct NewItemView: View {
                 // 7. Season
                 Section(header: Text("SEASON")) {
                     Picker("Stagione", selection: $selectedSeason) {
-                        ForEach(seasons, id: \.self) { Text($0) }
+                        // Usa l'Enum Season reale!
+                        ForEach(Season.allCases, id: \.self) { season in
+                            Text(season.rawValue).tag(season)
+                        }
                     }
                     .pickerStyle(.segmented)
                 }
@@ -132,16 +163,15 @@ struct NewItemView: View {
                             .font(.headline)
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity, minHeight: 50)
-                            .background(description.isEmpty || selectedColor.isEmpty ? Color.gray : Color.black)
+                            .background(description.isEmpty || selectedColorUI.isEmpty ? Color.gray : Color.black)
                             .cornerRadius(10)
                     }
                     .listRowInsets(EdgeInsets())
                     .buttonStyle(PlainButtonStyle())
-                    // Ora la foto NON è più richiesta per abilitare il tasto
-                    .disabled(description.isEmpty || selectedColor.isEmpty)
+                    .disabled(description.isEmpty || selectedColorUI.isEmpty)
                 }
             }
-            .navigationTitle("Aggiungi Indumento")
+            .navigationTitle("Aggiungi Capo")
             .navigationBarItems(leading: Button("Annulla") { dismiss() })
         }
     }
@@ -149,12 +179,12 @@ struct NewItemView: View {
     // MARK: - Helper Functions
     
     func isColorDark(_ colorName: String) -> Bool {
-        let darkColors = ["BLACK", "NAVY", "DARK GRAY", "PURPLE", "MAROON", "BROWN", "MAGENTA"]
+        let darkColors = ["BLACK", "NAVY", "BURGUNDY", "BROWN"]
         return darkColors.contains(colorName)
     }
     
     func saveCloth() {
-        // 1. Gestione Immagine Opzionale
+        // 1. Gestione Immagine
         let finalImageData: Data
         if let uiImage = selectedImage, let data = uiImage.jpegData(compressionQuality: 0.7) {
             finalImageData = data
@@ -164,60 +194,37 @@ struct NewItemView: View {
             finalImageData = placeholder?.jpegData(compressionQuality: 0.1) ?? Data()
         }
         
-        // 2. MAPPING: Stringhe UI -> Enum del tuo modello
-        
-        // Categoria
-        let position: Position
-        let type: ClothingType
-        switch selectedCategory {
-        case "Pants", "Gonna":
-            position = .bottom
-            type = (selectedCategory == "Trousers") ? .trousers : .skirt // Cambia .pants/.skirt con i tuoi veri case
-        case "Footwear":
-            position = .footwear // Cambia con il tuo vero case
-            type = .sneakers    // Cambia con il tuo vero case
-        default:
-            position = .top
-            type = .shirt
-        }
-        
-        // Stagione
-        let season: Season
-        switch selectedSeason {
-        case "Spring": season = .spring
-        case "Summer": season = .summer
-        case "Fall": season = .fall
-        case "Winter": season = .winter
-        default: season = .summer
-        }
-        
-        // Colore (Assicurati che i case dell'enum corrispondano a quelli che hai creato)
-        let colore: coloreIndumento
-        switch selectedColor {
-        case "WHITE": colore = .white
-        case "BLACK": colore = .black
-        case "RED": colore = .red
-        case "BLUE", "NAVY", "CYAN": colore = .blue // Puoi raggruppare più stringhe nello stesso case!
-        case "GREEN", "OLIVE", "TEAL": colore = .green
-        case "YELLOW": colore = .yellow
-        // Aggiungi gli altri colori qui...
-        default: colore = .black // Colore di default se non trova corrispondenza
+        // 2. MAPPING COLORE (Dalla UI String al tuo Enum coloreIndumento)
+        let finalColor: coloreIndumento
+        switch selectedColorUI {
+        case "WHITE": finalColor = .white
+        case "BLACK": finalColor = .black
+        case "GREY": finalColor = .grey
+        case "RED": finalColor = .red
+        case "BLUE": finalColor = .blue
+        case "NAVY": finalColor = .navy
+        case "GREEN": finalColor = .green
+        case "PINK": finalColor = .pink
+        case "BURGUNDY": finalColor = .burgundy
+        case "YELLOW": finalColor = .yellow
+        case "BROWN": finalColor = .brown
+        case "BEIGE": finalColor = .beige
+        default: finalColor = .black
         }
 
-        // 3. Chiamata al TUO manager.addItem
-        // I parametri ora rispettano esattamente la firma della tua funzione!
+        // 3. Chiamata al Manager
+        // Passiamo direttamente gli @State (che ora sono già i tuoi Enum!)
         manager.addItem(
             image: finalImageData,
-            position: position,
-            type: type,
-            season: [season],
-            coloreIndumento: [colore], // Passiamo il colore mappato dentro un array
+            position: selectedPosition,
+            type: selectedType,
+            season: [selectedSeason],
+            coloreIndumento: [finalColor],
             style: [selectedStyle],
             brand: brand,
             description: description
         )
         
-        // Chiude la schermata e torna alla Home
         dismiss()
     }
 }
