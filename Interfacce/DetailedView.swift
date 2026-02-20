@@ -1,6 +1,6 @@
 import SwiftUI
 
-// Dizionario dei colori
+// Dizionario dei colori (come da tua foto)
 let uiColors: [String: Color] = [
     "WHITE": .white, "LIGHT GRAY": Color(white: 0.8), "GRAY": .gray, "DARK GRAY": Color(white: 0.2), "BLACK": .black,
     "RED": .red, "MAROON": Color(red: 0.5, green: 0, blue: 0), "ORANGE": .orange, "BEIGE": Color(red: 0.96, green: 0.96, blue: 0.86), "YELLOW": .yellow,
@@ -13,15 +13,23 @@ struct DetailView: View {
     var onDelete: () -> Void
     @Environment(\.dismiss) var dismiss
     
+    // Stato per gestire l'apertura della tendina "Aggiungi Indumento"
+    @State private var showingEditSheet = false
+    
     var body: some View {
         VStack {
             // 1. Menu in alto
             HStack {
                 Spacer()
                 Menu {
-                    Button(action: { /* Modify */ }) {
+                    // Tasto Modify: attiva lo sheet
+                    Button(action: {
+                        showingEditSheet = true
+                    }) {
                         Label("Modify", systemImage: "pencil")
                     }
+                    
+                    // Tasto Delete
                     Button(role: .destructive, action: {
                         onDelete()
                         dismiss()
@@ -49,7 +57,7 @@ struct DetailView: View {
                             .cornerRadius(12)
                     }
 
-                    // 3. Info Prodotto (Brand e Tipo)
+                    // 3. Info Prodotto
                     VStack(alignment: .leading, spacing: 5) {
                         Text(cloth.brand)
                             .font(.title2.bold())
@@ -59,34 +67,30 @@ struct DetailView: View {
 
                     Divider()
 
-                    // 4. Dettagli (Brand, Stagione, Colori)
+                    // 4. Dettagli
                     VStack(alignment: .leading, spacing: 15) {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Brand")
-                                .font(.headline)
-                            Text(cloth.brand)
-                                .foregroundColor(.secondary)
+                            Text("Brand").font(.headline)
+                            Text(cloth.brand).foregroundColor(.secondary)
                         }
 
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Season")
-                                .font(.headline)
+                            Text("Season").font(.headline)
                             Text(cloth.season.map { $0.rawValue }.joined(separator: ", "))
                                 .foregroundColor(.secondary)
                         }
 
                         // --- SEZIONE COLORI: TESTO + PALLINO ---
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Colors")
-                                .font(.headline)
+                            Text("Colors").font(.headline)
                             
                             ForEach(cloth.coloreIndumentoRicerca, id: \.self) { coloreEnum in
                                 HStack(spacing: 8) {
-                                    // Prima il nome del colore
+                                    // Testo del colore
                                     Text(coloreEnum.rawValue.capitalized)
                                         .foregroundColor(.secondary)
                                     
-                                    // Poi il pallino colorato
+                                    // Pallino colorato con bordo sottile (per il bianco)
                                     Circle()
                                         .fill(uiColors[coloreEnum.rawValue] ?? Color.gray)
                                         .frame(width: 14, height: 14)
@@ -104,7 +108,7 @@ struct DetailView: View {
             Spacer()
 
             // 5. Pulsante Match
-            Button(action: { /* Azione Match */ }) {
+            Button(action: { /* Match Action */ }) {
                 Text("Match")
                     .font(.headline)
                     .foregroundColor(.white)
@@ -118,5 +122,11 @@ struct DetailView: View {
         }
         .navigationTitle("Dettaglio")
         .navigationBarTitleDisplayMode(.inline)
+        
+        // --- QUESTA È LA TENDINA CHE SI APRE CLICCANDO MODIFY ---
+        .sheet(isPresented: $showingEditSheet) {
+            
+            NewItemView()
+        }
     }
 }
