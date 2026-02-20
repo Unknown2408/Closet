@@ -150,7 +150,7 @@ struct Cloth: Identifiable, Codable {
     var coloreIndumentoRicerca: [coloreIndumento]
     var brand: String
     var style: [String]
-    var description: String
+    
     
     var favourite: Bool = false
 }
