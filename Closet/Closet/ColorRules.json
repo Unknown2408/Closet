@@ -1,15 +1,28 @@
 {
-  "Black": ["White", "Grey", "Beige", "Red", "Blue", "Green", "Pink"],
-  "White": ["Black", "Navy", "Beige", "Brown", "Grey", "Red", "Green", "Blue", "Pink", "Burgundy", "Yellow"],
-  "Grey": ["Black", "White", "Navy", "Burgundy", "Pink", "Blue", "Red"],
-  "Navy": ["White", "Beige", "Grey", "Brown", "Burgundy", "Green", "Red", "Yellow"],
-  "Beige": ["Navy", "White", "Black", "Brown", "Green", "Red", "Burgundy", "Blue"],
-  "Brown": ["White", "Beige", "Navy", "Green", "Yellow", "Burgundy"],
+  "White": ["Black", "Navy", "Beige", "Brown", "Light Gray", "Gray", "Dark Gray", "Red", "Green", "Olive", "Teal", "Blue", "Cyan", "Pink", "Maroon", "Purple", "Magenta", "Yellow", "Orange"],
   
-  "Red": ["Black", "White", "Navy", "Beige", "Grey"],
-  "Blue": ["White", "Beige", "Black", "Grey", "Brown"],
-  "Green": ["White", "Beige", "Brown", "Navy", "Black", "Grey"],
-  "Pink": ["White", "Grey", "Navy", "Black", "Beige"],
-  "Burgundy": ["Navy", "Grey", "White", "Black", "Beige", "Brown"],
-  "Yellow": ["Navy", "Grey", "White", "Black", "Brown", "Beige"]
+  "Light Gray": ["Black", "White", "Navy", "Maroon", "Purple", "Magenta", "Pink", "Blue", "Cyan", "Red"],
+  "Gray": ["Black", "White", "Navy", "Maroon", "Purple", "Magenta", "Pink", "Blue", "Cyan", "Red"],
+  "Dark Gray": ["Black", "White", "Navy", "Maroon", "Purple", "Magenta", "Pink", "Blue", "Cyan", "Red"],
+  "Black": ["White", "Light Gray", "Gray", "Dark Gray", "Beige", "Red", "Blue", "Cyan", "Green", "Olive", "Teal", "Pink", "Purple", "Magenta", "Yellow", "Orange", "Maroon"],
+  
+  "Beige": ["Navy", "White", "Black", "Brown", "Green", "Olive", "Teal", "Red", "Maroon", "Purple", "Blue", "Cyan"],
+  "Brown": ["White", "Beige", "Navy", "Green", "Olive", "Yellow", "Orange", "Maroon"],
+  
+  "Red": ["Black", "White", "Navy", "Beige", "Light Gray", "Gray", "Dark Gray"],
+  "Maroon": ["Navy", "Light Gray", "Gray", "Dark Gray", "White", "Black", "Beige", "Brown", "Pink"],
+  "Pink": ["White", "Light Gray", "Gray", "Dark Gray", "Navy", "Black", "Beige", "Maroon", "Purple"],
+  "Purple": ["White", "Light Gray", "Gray", "Black", "Beige", "Pink", "Navy"],
+  "Magenta": ["White", "Black", "Light Gray", "Gray", "Dark Gray", "Navy", "Pink"],
+  
+  "Orange": ["White", "Black", "Navy", "Brown", "Beige", "Olive"],
+  "Yellow": ["Navy", "Light Gray", "Gray", "Dark Gray", "White", "Black", "Brown", "Beige", "Teal", "Blue"],
+  
+  "Green": ["White", "Beige", "Brown", "Navy", "Black", "Light Gray", "Gray", "Dark Gray", "Yellow"],
+  "Olive": ["White", "Black", "Beige", "Brown", "Navy", "Orange", "Yellow", "Maroon"],
+  "Teal": ["White", "Black", "Light Gray", "Gray", "Beige", "Navy", "Yellow", "Brown"],
+  
+  "Cyan": ["White", "Black", "Light Gray", "Gray", "Dark Gray", "Navy", "Beige", "Pink"],
+  "Blue": ["White", "Beige", "Black", "Light Gray", "Gray", "Dark Gray", "Brown", "Yellow", "Pink"],
+  "Navy": ["White", "Beige", "Light Gray", "Gray", "Dark Gray", "Brown", "Maroon", "Magenta", "Pink", "Green", "Olive", "Teal", "Red", "Yellow", "Orange", "Cyan", "Blue"]
 }

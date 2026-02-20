@@ -107,7 +107,7 @@ import SwiftUI
     // Gestione dei vestiti
     func addItem(image: Data, position: Position, type: ClothingType, season: [Season], coloreIndumento: [coloreIndumento], style: [String], brand: String, description: String) {
         let cleanBrand = brand.trimmingCharacters(in: .whitespacesAndNewlines)
-        let newItem = Cloth(image: image, position: position, type: type, season: season, coloreIndumentoRicerca: coloreIndumento, brand: cleanBrand, style: style, description: description)
+        let newItem = Cloth(image: image, position: position, type: type, season: season, coloreIndumentoRicerca: coloreIndumento, brand: cleanBrand, style: style)
         inventory.append(newItem)
         save()
     }
@@ -156,34 +156,50 @@ import SwiftUI
     
     // COLOR MATCHING
     func getCascadingSuggestions(for selectedItems: [Cloth]) -> [Cloth] {
-        guard !selectedItems.isEmpty else { return [] }
-        
-        let occupiedPositions = selectedItems.map { $0.position }
-        var commonValidColors: Set<String> = []
-        
-        if let firstItem = selectedItems.first,
-           let firstColor = firstItem.coloreIndumentoRicerca.first {
-            let compatibleWithFirst = colorRules[firstColor.rawValue] ?? []
-            commonValidColors = Set(compatibleWithFirst)
-        }
-        
-        for item in selectedItems.dropFirst() {
-            if let color = item.coloreIndumentoRicerca.first {
-                let colorString: String = color.rawValue
-                let arrayColoriCompatibili: [String] = colorRules[colorString] ?? []
-                let compatibleWithItem: Set<String> = Set(arrayColoriCompatibili)
-                commonValidColors.formIntersection(compatibleWithItem)
+            guard !selectedItems.isEmpty else { return [] }
+            
+            let occupiedPositions = selectedItems.map { $0.position }
+            var commonValidColors: Set<String> = []
+            
+            if let firstItem = selectedItems.first,
+               let firstColor = firstItem.coloreIndumentoRicerca.first {
+                let compatibleWithFirst = colorRules[firstColor.rawValue] ?? []
+                commonValidColors = Set(compatibleWithFirst)
             }
-        }
-        
-        let suggestions = inventory.filter { item in
-            let isPositionFree = !occupiedPositions.contains(item.position)
-            let hasValidColor = item.coloreIndumentoRicerca.contains { color in
-                commonValidColors.contains(color.rawValue)
+            
+            for item in selectedItems.dropFirst() {
+                if let color = item.coloreIndumentoRicerca.first {
+                    let colorString: String = color.rawValue
+                    let arrayColoriCompatibili: [String] = colorRules[colorString] ?? []
+                    let compatibleWithItem: Set<String> = Set(arrayColoriCompatibili)
+                    commonValidColors.formIntersection(compatibleWithItem)
+                }
             }
-            return isPositionFree && hasValidColor
+            
+            let suggestions = inventory.filter { item in
+                
+                // ⭐️ REGOLA DEL LAYERING E DEGLI ACCESSORI:
+                let isPositionFree: Bool
+                
+                if item.position == .top {
+                    // Massimo 2 Top sovrapposti (es. T-shirt + Cardigan)
+                    let topCount = occupiedPositions.filter { $0 == .top }.count
+                    isPositionFree = topCount < 2
+                } else if item.position == .accessories {
+                    // Nessun limite per gli accessori! L'utente può aggiungerne quanti ne vuole
+                    isPositionFree = true
+                } else {
+                    // Per pantaloni, scarpe e giacche: limite ferreo di 1 solo capo
+                    isPositionFree = !occupiedPositions.contains(item.position)
+                }
+                
+                let hasValidColor = item.coloreIndumentoRicerca.contains { color in
+                    commonValidColors.contains(color.rawValue)
+                }
+                
+                return isPositionFree && hasValidColor
+            }
+            
+            return suggestions
         }
-        
-        return suggestions
-    }
 }
