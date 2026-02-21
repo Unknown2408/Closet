@@ -1,11 +1,3 @@
-//
-//  CustomVideoPlayer.swift
-//  Closet
-//
-//  Created by Nitharsan on 18/02/26.
-//
-
-
 import SwiftUI
 import AVFoundation
 

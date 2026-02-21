@@ -1,6 +1,6 @@
 import SwiftUI
 
-// Dizionario dei colori (come da tua foto)
+// Dizionario dei colori
 let uiColors: [String: Color] = [
     "WHITE": .white, "LIGHT GRAY": Color(white: 0.8), "GRAY": .gray, "DARK GRAY": Color(white: 0.2), "BLACK": .black,
     "RED": .red, "MAROON": Color(red: 0.5, green: 0, blue: 0), "ORANGE": .orange, "BEIGE": Color(red: 0.96, green: 0.96, blue: 0.86), "YELLOW": .yellow,
@@ -13,23 +13,35 @@ struct DetailView: View {
     var onDelete: () -> Void
     @Environment(\.dismiss) var dismiss
     
+    
+    // Stato per gestire il preferito (cuoricino in alto)
+    @State private var isFavorite: Bool = false
+    
     // Stato per gestire l'apertura della tendina "Aggiungi Indumento"
     @State private var showingEditSheet = false
     
     var body: some View {
         VStack {
-            // 1. Menu in alto
-            HStack {
+            // 1. Menu in alto con Cuoricino e Ellipsis
+            HStack(spacing: 20) {
                 Spacer()
+                
+                // Cuoricino in alto (L'UNICO RIMASTO)
+                Button(action: {
+                    isFavorite.toggle()
+                }) {
+                    Image(systemName: isFavorite ? "heart.fill" : "heart")
+                        .font(.system(size: 24))
+                        .foregroundColor(.black)
+                }
+                
                 Menu {
-                    // Tasto Modify: attiva lo sheet
                     Button(action: {
                         showingEditSheet = true
                     }) {
                         Label("Modify", systemImage: "pencil")
                     }
                     
-                    // Tasto Delete
                     Button(role: .destructive, action: {
                         onDelete()
                         dismiss()
@@ -47,13 +59,15 @@ struct DetailView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    // 2. Immagine
+                    
+                    // 2. Immagine (Cuoricino rimosso da qui)
                     if let uiImage = UIImage(data: cloth.image) {
                         Image(uiImage: uiImage)
                             .resizable()
                             .scaledToFit()
                             .frame(maxWidth: .infinity)
                             .frame(height: 300)
+                            .background(Color(UIColor.systemGray6))
                             .cornerRadius(12)
                     }
 
@@ -80,17 +94,15 @@ struct DetailView: View {
                                 .foregroundColor(.secondary)
                         }
 
-                        // --- SEZIONE COLORI: TESTO + PALLINO ---
+                        // SEZIONE COLORI
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Colors").font(.headline)
                             
                             ForEach(cloth.coloreIndumentoRicerca, id: \.self) { coloreEnum in
                                 HStack(spacing: 8) {
-                                    // Testo del colore
                                     Text(coloreEnum.rawValue.capitalized)
                                         .foregroundColor(.secondary)
                                     
-                                    // Pallino colorato con bordo sottile (per il bianco)
                                     Circle()
                                         .fill(uiColors[coloreEnum.rawValue] ?? Color.gray)
                                         .frame(width: 14, height: 14)
@@ -122,10 +134,7 @@ struct DetailView: View {
         }
         .navigationTitle("Dettaglio")
         .navigationBarTitleDisplayMode(.inline)
-        
-        // --- QUESTA È LA TENDINA CHE SI APRE CLICCANDO MODIFY ---
         .sheet(isPresented: $showingEditSheet) {
-            
             NewItemView()
         }
     }
