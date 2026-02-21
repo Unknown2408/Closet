@@ -1,30 +1,32 @@
 import SwiftUI
 
 struct SearchView: View {
+    // 1. Colleghiamo il Manager (per cercare nel database dei vestiti)
     @Environment(ClosetManager.self) var manager
+    
+    // 2. Stato per la barra di ricerca
     @State private var searchText = ""
     
-    // --- SETUP GRIGLIA PER I RISULTATI ---
-    // Serve per mostrare le ClothCard quando trovi un vestito
+    // 3. Configurazione Griglia per i risultati (2 colonne)
     let columns = [
         GridItem(.flexible(), spacing: 16),
         GridItem(.flexible(), spacing: 16)
     ]
     
-    // --- LOGICA DI RICERCA PER ID ---
+    // --- LOGICA DI RICERCA (SOLO NOME/BRAND) ---
     var searchResults: [Cloth] {
         if searchText.isEmpty {
             return []
         } else {
             return manager.inventory.filter { item in
-                // Converte l'UUID in stringa e controlla se contiene il testo cercato
-                // es. se l'ID è "E621E1F8...", scrivendo "E621" lo troverà.
-                item.id.uuidString.localizedCaseInsensitiveContains(searchText)
+                // Cerca ESCLUSIVAMENTE nel nome che hai inserito (brand)
+                // Ignora categorie, colori o ID numerici.
+                item.brand.localizedCaseInsensitiveContains(searchText)
             }
         }
     }
     
-    // Funzione helper per le immagini delle Categorie (quando non si cerca)
+    // Funzione helper per le immagini delle Categorie
     func imageName(for position: Position) -> String {
         switch position {
         case .top:        return "maglia"
@@ -51,12 +53,14 @@ struct SearchView: View {
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(.gray)
                         
-                        // Placeholder aggiornato
-                        TextField("Search by Item ID ...", text: $searchText)
+                        // Placeholder
+                        TextField("Search items by name...", text: $searchText)
                         
+                        // Tasto X per cancellare
                         if !searchText.isEmpty {
                             Button(action: { searchText = "" }) {
-                                Image(systemName: "xmark.circle.fill").foregroundColor(.gray)
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.gray)
                             }
                         }
                     }
@@ -68,8 +72,7 @@ struct SearchView: View {
                     // --- LOGICA DI VISUALIZZAZIONE ---
                     
                     if searchText.isEmpty {
-                        // CASO A: NESSUNA RICERCA -> MOSTRA LE CATEGORIE MACRO
-                        // (Questa è la lista che avevi prima)
+                        // CASO A: NESSUNA RICERCA -> MOSTRA LE CATEGORIE
                         ForEach(Position.allCases) { position in
                             NavigationLink(destination: CategoryDetailView(selectedPosition: position)) {
                                 HStack(spacing: 20) {
@@ -94,25 +97,28 @@ struct SearchView: View {
                         }
                         
                     } else {
-                        // CASO B: RICERCA ATTIVA -> MOSTRA I VESTITI TROVATI PER ID
+                        // CASO B: RICERCA ATTIVA -> MOSTRA I RISULTATI
                         if searchResults.isEmpty {
+                            // Nessun risultato trovato
                             VStack(spacing: 20) {
                                 Spacer(minLength: 50)
-                                Image(systemName: "doc.text.magnifyingglass")
+                                Image(systemName: "magnifyingglass")
                                     .font(.system(size: 50))
-                                    .foregroundColor(.gray)
-                                Text("No item found with this ID")
+                                    .foregroundColor(.gray.opacity(0.5))
+                                Text("No items found for \"\(searchText)\"")
                                     .foregroundColor(.gray)
                             }
                             .frame(maxWidth: .infinity)
+                            
                         } else {
-                            // Mostra i risultati usando le ClothCard
+                            // Griglia dei vestiti trovati
                             LazyVGrid(columns: columns, spacing: 20) {
                                 ForEach(searchResults) { cloth in
-                                    // Qui mostriamo direttamente il vestito trovato
+                                    // Qui usiamo la TUA ClothCard originale senza modifiche
                                     ClothCard(cloth: cloth)
                                 }
                             }
+                            .padding(.bottom, 20)
                         }
                     }
                 }
@@ -123,8 +129,7 @@ struct SearchView: View {
     }
 }
 
-
-// Preview
+// Preview per testare
 struct SearchView_Previews: PreviewProvider {
     static var previews: some View {
         SearchView()
