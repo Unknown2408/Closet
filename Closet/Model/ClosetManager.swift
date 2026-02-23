@@ -119,6 +119,23 @@ import SwiftUI
         }
     }
     
+    func updateItem(id: UUID, image: Data, name: String, position: Position, type: ClothingType, season: [Season], coloreIndumento: [coloreIndumento], style: [String], brand: String) {
+            if let index = inventory.firstIndex(where: { $0.id == id }) {
+                let cleanBrand = brand.trimmingCharacters(in: .whitespacesAndNewlines)
+                
+                inventory[index].image = image
+                inventory[index].name = name
+                inventory[index].position = position
+                inventory[index].type = type
+                inventory[index].season = season
+                inventory[index].coloreIndumentoRicerca = coloreIndumento
+                inventory[index].style = style
+                inventory[index].brand = cleanBrand
+                
+                save()
+            }
+    }
+    
     func deleteMultipleItems(withIds ids: Set<UUID>) {
         inventory = inventory.filter { !ids.contains($0.id) }
         save()

@@ -35,7 +35,7 @@ struct SearchView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.white.ignoresSafeArea() // Sfondo bianco universale
+                Color.white.ignoresSafeArea()
                 
                 VStack(alignment: .leading, spacing: 0) {
                     
@@ -43,8 +43,8 @@ struct SearchView: View {
                     Text("My Closet")
                         .font(.system(size: 40, weight: .bold))
                         .foregroundColor(.black)
-                        .padding(.horizontal, 25)
-                        .padding(.top, 20)
+                        .padding(.horizontal)
+                        .padding(.top, 16)
                     
                     // 2. BARRA DI RICERCA CUSTOM FISSA
                     HStack {
@@ -65,18 +65,19 @@ struct SearchView: View {
                     .background(Color.white)
                     .clipShape(Capsule())
                     .overlay(Capsule().stroke(Color.black, lineWidth: 2))
-                    .padding(.horizontal, 25)
-                    .padding(.top, 20)
-                    .padding(.bottom, 20) // Spazio prima che inizi lo scroll
+                    .padding(.horizontal)
+                    .padding(.top, 16)
+                    .padding(.bottom, 20)
                     
-                    // 3. SCROLLVIEW (Solo questa parte scorrerà)
+                    // 3. SCROLLVIEW
                     ScrollView {
                         VStack(alignment: .leading, spacing: 30) {
                             
                             if searchText.isEmpty {
-                                // CASO A: NESSUNA RICERCA -> MOSTRA LE CATEGORIE
+                                // CASO A: NESSUNA RICERCA -> MOSTRA LE MACRO-CATEGORIE (Tops, Bottoms...)
                                 ForEach(Position.allCases) { position in
-                                    NavigationLink(destination: CategoryDetailView(selectedPosition: position)) {
+                                    //Punta alla vista intermedia, con le sotto-categorie
+                                    NavigationLink(destination: SubCategoryListView(position: position)) {
                                         HStack(spacing: 20) {
                                             Image(imageName(for: position))
                                                 .resizable()
@@ -121,17 +122,15 @@ struct SearchView: View {
                                 }
                             }
                         }
-                        .padding(.horizontal, 25)
+                        .padding(.horizontal)
                         .padding(.bottom, 50)
                     }
-                    // Nasconde la tastiera appena si inizia a scorrere in giù
                     .scrollDismissesKeyboard(.immediately)
                 }
             }
         }
     }
 }
-
 // Preview per testare
 struct SearchView_Previews: PreviewProvider {
     static var previews: some View {

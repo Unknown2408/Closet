@@ -30,8 +30,8 @@ struct ClosetContentView: View {
                                 .foregroundColor(.black)
                         }
                     }
-                    .padding(.horizontal, 25)
-                    .padding(.top, 20)
+                    .padding(.horizontal)
+                    .padding(.top, 16)
                     
                     // CONTROLLO EMPTY STATE
                     if manager.inventory.isEmpty {
@@ -66,8 +66,8 @@ struct ClosetContentView: View {
                                     }
                                 }
                             }
-                            .padding(.horizontal, 25) // Allineamento corretto
-                            .padding(.bottom, 20)
+                            .padding(.horizontal) // Allineamento corretto
+                            .padding(.bottom, 16)
                         }
                     }
                 }

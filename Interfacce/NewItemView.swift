@@ -2,6 +2,8 @@ import SwiftUI
 import UIKit
 
 struct NewItemView: View {
+    var itemToEdit: Cloth? = nil
+    
     // MARK: - State Properties
     @State private var name: String = ""
     
@@ -204,6 +206,21 @@ struct NewItemView: View {
                 }
             } message: {
                 Text("Inserisci il nome del brand da aggiungere alla lista.")
+            }
+        }
+        .onAppear {
+            if let cloth = itemToEdit {
+                name = cloth.name
+                selectedPosition = cloth.position
+                selectedType = cloth.type
+                selectedSeason = cloth.season.first ?? .summer
+                selectedStyle = cloth.style.first ?? "Casual"
+                selectedBrand = cloth.brand
+                previousBrand = cloth.brand
+                if let firstColor = cloth.coloreIndumentoRicerca.first {
+                    selectedColorUI = firstColor.rawValue.uppercased()
+                }
+                selectedImage = UIImage(data: cloth.image)
             }
         }
     }

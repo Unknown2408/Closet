@@ -28,15 +28,14 @@ struct OutfitsView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 0) {
                 
                 // --- CUSTOM HEADER ---
                 // Questo mantiene il testo GRANDE a SINISTRA, e il menu a DESTRA sulla stessa riga.
                 HStack(alignment: .center) {
                     Text("My Outfits")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                    
+                        .font(.system(size: 40, weight: .bold))
+                        .foregroundColor(.black)
                     Spacer() // Spinge i bottoni a destra
                     
                     if isEditing {

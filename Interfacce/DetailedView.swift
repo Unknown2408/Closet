@@ -22,6 +22,10 @@ struct DetailView: View {
     // Stato per gestire l'apertura della tendina "Aggiungi Indumento"
     @State private var showingEditSheet = false
     
+    var currentCloth: Cloth {
+            manager.inventory.first(where: { $0.id == cloth.id }) ?? cloth
+    }
+    
     var body: some View {
         VStack {
             // 1. Menu in alto con Cuoricino e Ellipsis
@@ -67,7 +71,7 @@ struct DetailView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     
                     // 2. Immagine
-                    if let uiImage = UIImage(data: cloth.image) {
+                    if let uiImage = UIImage(data: currentCloth.image) {
                         Image(uiImage: uiImage)
                             .resizable()
                             .scaledToFit()
@@ -148,7 +152,7 @@ struct DetailView: View {
         .sheet(isPresented: $showingEditSheet) {
             // Nota: Se usi NewItemView per modificare, potresti dover adattare
             // NewItemView in futuro in modo che accetti un 'cloth' pre-compilato.
-            NewItemView()
+            NewItemView(itemToEdit: currentCloth)
         }
     }
 }
