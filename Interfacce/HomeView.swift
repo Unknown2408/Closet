@@ -11,7 +11,7 @@ struct HomeView: View {
             
             // TAB 1: Visualizza il contenuto dell'armadio
             // Passiamo il nome alla vista figlia
-            ClosetContentView(nome: nome)
+            ClosetContentView()
                 .tabItem {
                     Label("Closet", systemImage: "hanger")
                 }

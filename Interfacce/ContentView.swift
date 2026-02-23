@@ -1,40 +1,53 @@
 import SwiftUI
 
 struct ContentView: View {
-    @Binding var nome: String
-    @State private var cognome: String = ""
+    // Gestisce lo stato dell'animazione iniziale
+    @State private var splashFinita = false
     
-    var isFormValid: Bool {
-        !nome.trimmingCharacters(in: .whitespaces).isEmpty &&
-        !cognome.trimmingCharacters(in: .whitespaces).isEmpty
-    }
+    // Inizializziamo qui il manager globale dell'app
+    @State private var manager = ClosetManager()
 
     var body: some View {
-        NavigationStack { // Necessario per il passaggio tra file
-            VStack(spacing: 20) {
-                TextField("Nome", text: $nome)
-                    .textFieldStyle(.roundedBorder)
-                    .padding(.horizontal)
-                
-                TextField("Cognome", text: $cognome)
-                    .textFieldStyle(.roundedBorder)
-                    .padding(.horizontal)
-                
-                // Il NavigationLink punta alla struct HomeView
-                NavigationLink(destination: HomeView(nome: nome)) {
-                    Text("Next")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(isFormValid ? Color.white : Color.gray)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
+        ZStack {
+            if !splashFinita {
+                // 1. SCHERMATA DI SPLASH (Caricamento)
+                ZStack {
+                    Color.black.ignoresSafeArea()
+                    
+                    VStack {
+                        Image("LogoApp") // Assicurati che il nome corrisponda nei tuoi Assets
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 150)
+                        
+                        Text("Welcome to your Closet")
+                            .font(.system(size: 25, weight: .bold, design: .serif))
+                            .foregroundColor(.white)
+                            .padding(.top, 10)
+                    }
                 }
-                .disabled(!isFormValid)
-                .padding()
+                .transition(.opacity) // Prepara la dissolvenza in uscita
                 
-                Spacer()
+            } else {
+                // 2. HOMEVIEW (App vera e propria)
+                // Passiamo "" (stringa vuota) come nome, così la tua HomeView scriverà automaticamente "My Closet"
+                HomeView(nome: "")
+                    .environment(manager) // Passiamo il manager a tutta l'app
+                    .transition(.opacity) // Prepara la dissolvenza in entrata
             }
-            .navigationTitle("Next")
+        }
+        // Applica l'animazione di dissolvenza (1.5 secondi) a tutto lo ZStack
+        .animation(.easeInOut(duration: 1.5), value: splashFinita)
+        .onAppear {
+            // Avvia un timer appena l'app si apre
+            // Dopo 2.5 secondi, cambia lo stato e innesca la dissolvenza
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                splashFinita = true
+            }
         }
     }
+}
+
+#Preview {
+    ContentView()
 }
