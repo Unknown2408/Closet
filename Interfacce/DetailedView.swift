@@ -10,11 +10,13 @@ let uiColors: [String: Color] = [
 
 struct DetailView: View {
     let cloth: Cloth
-    var onDelete: () -> Void
+    
+    // Rimosso `var onDelete: () -> Void` perché ora ci pensa il manager
+    @Environment(ClosetManager.self) private var manager
     @Environment(\.dismiss) var dismiss
     
-    
     // Stato per gestire il preferito (cuoricino in alto)
+    // Se hai il campo 'favourite' nella struct, sarebbe meglio legarlo a quello.
     @State private var isFavorite: Bool = false
     
     // Stato per gestire l'apertura della tendina "Aggiungi Indumento"
@@ -26,15 +28,18 @@ struct DetailView: View {
             HStack(spacing: 20) {
                 Spacer()
                 
-                // Cuoricino in alto (L'UNICO RIMASTO)
+                // Cuoricino in alto
                 Button(action: {
                     isFavorite.toggle()
+                    // Opzionale: Se vuoi che il preferito si salvi davvero nel JSON
+                    // manager.toggleFavorite(ofItemWithID: cloth.id)
                 }) {
                     Image(systemName: isFavorite ? "heart.fill" : "heart")
                         .font(.system(size: 24))
                         .foregroundColor(.black)
                 }
                 
+                // Menu (...)
                 Menu {
                     Button(action: {
                         showingEditSheet = true
@@ -42,8 +47,9 @@ struct DetailView: View {
                         Label("Modify", systemImage: "pencil")
                     }
                     
+                    // L'azione di cancellazione usa direttamente il Manager
                     Button(role: .destructive, action: {
-                        onDelete()
+                        manager.removeItem(withID: cloth.id)
                         dismiss()
                     }) {
                         Label("Delete", systemImage: "trash")
@@ -60,7 +66,7 @@ struct DetailView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     
-                    // 2. Immagine (Cuoricino rimosso da qui)
+                    // 2. Immagine
                     if let uiImage = UIImage(data: cloth.image) {
                         Image(uiImage: uiImage)
                             .resizable()
@@ -104,7 +110,8 @@ struct DetailView: View {
                                         .foregroundColor(.secondary)
                                     
                                     Circle()
-                                        .fill(uiColors[coloreEnum.rawValue] ?? Color.gray)
+                                        // Usiamo .uppercased() perché le chiavi in uiColors sono tutte maiuscole
+                                        .fill(uiColors[coloreEnum.rawValue.uppercased()] ?? Color.gray)
                                         .frame(width: 14, height: 14)
                                         .overlay(
                                             Circle().stroke(Color.black.opacity(0.1), lineWidth: 1)
@@ -134,7 +141,13 @@ struct DetailView: View {
         }
         .navigationTitle("Dettaglio")
         .navigationBarTitleDisplayMode(.inline)
+        // Setta lo stato iniziale del cuoricino se salvato nel database
+        .onAppear {
+            isFavorite = cloth.favourite
+        }
         .sheet(isPresented: $showingEditSheet) {
+            // Nota: Se usi NewItemView per modificare, potresti dover adattare
+            // NewItemView in futuro in modo che accetti un 'cloth' pre-compilato.
             NewItemView()
         }
     }

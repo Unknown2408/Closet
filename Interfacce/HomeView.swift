@@ -2,13 +2,16 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var selection = 0
+    // NUOVO: Aggiunta variabile per ricevere il nome inserito
+    let nome: String
     
     var body: some View {
         // La TabView deve stare al "livello più alto"
         TabView(selection: $selection) {
             
             // TAB 1: Visualizza il contenuto dell'armadio
-            ClosetContentView()
+            // Passiamo il nome alla vista figlia
+            ClosetContentView(nome: nome)
                 .tabItem {
                     Label("Closet", systemImage: "hanger")
                 }
@@ -34,4 +37,3 @@ struct HomeView: View {
         .accentColor(.black)
     }
 }
-

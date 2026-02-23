@@ -4,11 +4,24 @@ struct ClosetContentView: View {
     @Environment(ClosetManager.self) private var manager
     @State private var showingAddItem = false
     
+    // NUOVO: Riceve il nome dalla HomeView
+    let nome: String
+    
     // Configurazione griglia a 2 colonne
     let columns = [
         GridItem(.flexible(), spacing: 16),
         GridItem(.flexible(), spacing: 16)
     ]
+    
+    // NUOVO: Logica per il titolo dinamico
+    var headerTitle: String {
+        let cleanName = nome.trimmingCharacters(in: .whitespaces)
+        if cleanName.isEmpty {
+            return "My Closet" // Se ha cliccato "Forse più tardi"
+        } else {
+            return "Closet of \(cleanName)" // Se ha inserito un nome
+        }
+    }
     
     var body: some View {
         NavigationStack {
@@ -16,11 +29,14 @@ struct ClosetContentView: View {
                 SwiftUI.Color.white.ignoresSafeArea()
                 
                 VStack(alignment: .leading, spacing: 0) {
-                    // Header: My Closet + Pulsante per aggiungere
+                    // Header: Titolo Dinamico + Pulsante per aggiungere
                     HStack {
-                        Text("My Closet")
+                        // Utilizziamo headerTitle invece di "My Closet" fisso
+                        Text(headerTitle)
                             .font(.system(size: 40, weight: .bold))
                             .foregroundColor(.black)
+                            .minimumScaleFactor(0.6) // Utile se il nome è molto lungo per non farlo tagliare
+                            .lineLimit(1)
                         
                         Spacer()
                         
@@ -42,14 +58,11 @@ struct ClosetContentView: View {
                             Spacer()
                             
                             // Griglia con i dati reali del ClosetManager
+                            // Griglia con i dati reali del ClosetManager
                             LazyVGrid(columns: columns, spacing: 20) {
                                 ForEach(manager.inventory) { item in
-                                    NavigationLink(destination: DetailView(cloth: item, onDelete: {
-                                        // Questa è l'azione che verrà eseguita quando premi "Delete" nella DetailView
-                                        if let index = manager.inventory.firstIndex(where: { $0.id == item.id }) {
-                                            manager.inventory.remove(at: index)
-                                        }
-                                    })) {
+                                    // CANCELLA l'onDelete e lascia solo cloth: item
+                                    NavigationLink(destination: DetailView(cloth: item)) {
                                         ClothCard(cloth: item)
                                     }
                                     .buttonStyle(PlainButtonStyle())
@@ -66,5 +79,3 @@ struct ClosetContentView: View {
         }
     }
 }
-
-

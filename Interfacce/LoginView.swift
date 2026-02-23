@@ -2,7 +2,7 @@ import SwiftUI
 
 struct LoginView: View {
     @Binding var loginEffettuato: Bool
-    @Binding var nome: String 
+    @Binding var nome: String
     @State private var cognome: String = ""
     
     var isFormValid: Bool {
@@ -33,7 +33,19 @@ struct LoginView: View {
                         .cornerRadius(10)
                         .foregroundColor(.white)
                     
-        
+                    // NUOVO: Pulsante Skip "Forse più tardi.."
+                    Button(action: {
+                        withAnimation {
+                            nome = "" // Azzera il nome in modo esplicito
+                            loginEffettuato = true
+                        }
+                    }) {
+                        Text("Forse più tardi..")
+                            .font(.callout)
+                            .foregroundColor(.white.opacity(0.7))
+                            .underline()
+                    }
+                    .padding(.top, 5)
                 }
                 .padding(.horizontal, 40)
                 
