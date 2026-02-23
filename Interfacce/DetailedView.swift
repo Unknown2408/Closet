@@ -8,21 +8,20 @@ let uiColors: [String: Color] = [
     "PINK": .pink, "BROWN": .brown, "CYAN": .cyan, "TEAL": Color(red: 0, green: 0.5, blue: 0.5), "MAGENTA": Color(red: 1, green: 0, blue: 1)
 ]
 
+// MARK: - DETAIL VIEW PRINCIPALE
 struct DetailView: View {
     let cloth: Cloth
     
     @Environment(ClosetManager.self) private var manager
     @Environment(\.dismiss) var dismiss
     
-    // Stato per gestire il preferito (cuoricino in alto)
-    // Se hai il campo 'favourite' nella struct, sarebbe meglio legarlo a quello.
     @State private var isFavorite: Bool = false
-    
-    // Stato per gestire l'apertura della tendina "Aggiungi Indumento"
     @State private var showingEditSheet = false
+    @State private var showingMatchesSheet = false
     
+    // Calcola il capo aggiornato in tempo reale dal Manager
     var currentCloth: Cloth {
-            manager.inventory.first(where: { $0.id == cloth.id }) ?? cloth
+        manager.inventory.first(where: { $0.id == cloth.id }) ?? cloth
     }
     
     var body: some View {
@@ -31,18 +30,15 @@ struct DetailView: View {
             HStack(spacing: 20) {
                 Spacer()
                 
-                // Cuoricino in alto
                 Button(action: {
                     isFavorite.toggle()
-                    // Opzionale: Se vuoi che il preferito si salvi davvero nel JSON
-                    // manager.toggleFavorite(ofItemWithID: cloth.id)
+                    // Opzionale: manager.toggleFavorite(ofItemWithID: currentCloth.id)
                 }) {
                     Image(systemName: isFavorite ? "heart.fill" : "heart")
                         .font(.system(size: 24))
                         .foregroundColor(.black)
                 }
                 
-                // Menu (...)
                 Menu {
                     Button(action: {
                         showingEditSheet = true
@@ -50,9 +46,8 @@ struct DetailView: View {
                         Label("Modify", systemImage: "pencil")
                     }
                     
-                    // L'azione di cancellazione usa direttamente il Manager
                     Button(role: .destructive, action: {
-                        manager.removeItem(withID: cloth.id)
+                        manager.removeItem(withID: currentCloth.id)
                         dismiss()
                     }) {
                         Label("Delete", systemImage: "trash")
@@ -82,24 +77,24 @@ struct DetailView: View {
 
                     // 3. Info Prodotto
                     VStack(alignment: .leading, spacing: 5) {
-                        Text(cloth.brand)
+                        Text(currentCloth.brand)
                             .font(.title2.bold())
-                        Text(cloth.type.rawValue)
+                        Text(currentCloth.type.rawValue)
                             .foregroundColor(.secondary)
                     }
 
                     Divider()
 
-                    // 4. Dettagli
+                    // 4. Dettagli Extra
                     VStack(alignment: .leading, spacing: 15) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Brand").font(.headline)
-                            Text(cloth.brand).foregroundColor(.secondary)
+                            Text(currentCloth.brand).foregroundColor(.secondary)
                         }
 
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Season").font(.headline)
-                            Text(cloth.season.map { $0.rawValue }.joined(separator: ", "))
+                            Text(currentCloth.season.map { $0.rawValue }.joined(separator: ", "))
                                 .foregroundColor(.secondary)
                         }
 
@@ -107,13 +102,12 @@ struct DetailView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Colors").font(.headline)
                             
-                            ForEach(cloth.coloreIndumentoRicerca, id: \.self) { coloreEnum in
+                            ForEach(currentCloth.coloreIndumentoRicerca, id: \.self) { coloreEnum in
                                 HStack(spacing: 8) {
                                     Text(coloreEnum.rawValue.capitalized)
                                         .foregroundColor(.secondary)
                                     
                                     Circle()
-                                        // Usiamo .uppercased() perché le chiavi in uiColors sono tutte maiuscole
                                         .fill(uiColors[coloreEnum.rawValue.uppercased()] ?? Color.gray)
                                         .frame(width: 14, height: 14)
                                         .overlay(
@@ -130,8 +124,10 @@ struct DetailView: View {
             Spacer()
 
             // 5. Pulsante Match
-            Button(action: { /* Match Action */ }) {
-                Text("Match")
+            Button(action: {
+                showingMatchesSheet = true
+            }) {
+                Text("Match ✨")
                     .font(.headline)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
@@ -142,16 +138,134 @@ struct DetailView: View {
             .padding(.horizontal, 30)
             .padding(.bottom, 10)
         }
-        .navigationTitle("Dettaglio")
+        .navigationTitle(currentCloth.name)
         .navigationBarTitleDisplayMode(.inline)
-        // Setta lo stato iniziale del cuoricino se salvato nel database
         .onAppear {
-            isFavorite = cloth.favourite
+            isFavorite = currentCloth.favourite
         }
         .sheet(isPresented: $showingEditSheet) {
-            // Nota: Se usi NewItemView per modificare, potresti dover adattare
-            // NewItemView in futuro in modo che accetti un 'cloth' pre-compilato.
             NewItemView(itemToEdit: currentCloth)
+        }
+        .sheet(isPresented: $showingMatchesSheet) {
+            MatchCreationSheet(anchorCloth: currentCloth)
+        }
+    }
+}
+
+
+// MARK: - MODALE INTERATTIVA CREAZIONE OUTFIT
+struct MatchCreationSheet: View {
+    let anchorCloth: Cloth
+    @Environment(ClosetManager.self) private var manager
+    @Environment(\.dismiss) var dismiss
+    
+    // 1. Qui salviamo i capi che stiamo aggiungendo all'outfit (parte con il capo scelto)
+    @State private var selectedItems: [Cloth] = []
+    
+    // 2. Calcoliamo i suggerimenti in tempo reale basandoci su TUTTO ciò che è in selectedItems
+    var suggestions: [Cloth] {
+        let rawSuggestions = manager.getCascadingSuggestions(for: selectedItems)
+        // Filtriamo i suggerimenti per NON mostrare i capi che abbiamo già aggiunto
+        return rawSuggestions.filter { sugg in
+            !selectedItems.contains(where: { $0.id == sugg.id })
+        }
+    }
+    
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 25) {
+                
+                // --- SEZIONE 1: L'OUTFIT CHE STAI CREANDO ---
+                VStack(alignment: .leading) {
+                    Text("Your Outfit")
+                        .font(.title3.bold())
+                        .padding(.horizontal)
+                    
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 15) {
+                            ForEach(selectedItems) { item in
+                                // Il tasto meno (-) rimuove il capo
+                                ItemThumbnail(cloth: item, actionIcon: "minus.circle.fill") {
+                                    withAnimation(.spring()) {
+                                        // Non permettiamo di rimuovere il capo principale (anchorCloth)
+                                        if item.id != anchorCloth.id {
+                                            selectedItems.removeAll(where: { $0.id == item.id })
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+                }
+                .padding(.top, 20)
+                
+                Divider()
+                    .padding(.horizontal)
+                
+                // --- SEZIONE 2: I SUGGERIMENTI DELL'ALGORITMO ---
+                VStack(alignment: .leading) {
+                    Text("Magic Matches ✨")
+                        .font(.title3.bold())
+                        .padding(.horizontal)
+                    
+                    if suggestions.isEmpty {
+                        Text("No more matches found for these items.")
+                            .foregroundColor(.gray)
+                            .padding(.horizontal)
+                            .padding(.top, 10)
+                    } else {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 15) {
+                                ForEach(suggestions) { item in
+                                    // Il tasto più (+) aggiunge il capo all'outfit
+                                    ItemThumbnail(cloth: item, actionIcon: "plus.circle.fill") {
+                                        withAnimation(.spring()) {
+                                            selectedItems.append(item)
+                                        }
+                                    }
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                    }
+                }
+                
+                Spacer()
+                
+                // --- SEZIONE 3: PULSANTE SALVA ---
+                Button(action: {
+                    // Crea l'outfit usando la funzione del tuo manager!
+                    // Esempio fittizio (aggiusta in base alla tua funzione reale):
+                    // manager.createOutfit(items: selectedItems)
+                    
+                    print("Salvataggio outfit con \(selectedItems.count) capi!")
+                    dismiss()
+                }) {
+                    Text("Save Outfit")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(selectedItems.count > 1 ? Color.black : Color.gray)
+                        .cornerRadius(25)
+                }
+                .disabled(selectedItems.count < 2) // Disabilita se c'è solo il capo di partenza
+                .padding(.horizontal, 30)
+                .padding(.bottom, 20)
+            }
+            .navigationTitle("Build Outfit")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") { dismiss() }
+                        .foregroundColor(.black)
+                }
+            }
+            // Inizializza l'array con il capo da cui siamo partiti
+            .onAppear {
+                selectedItems = [anchorCloth]
+            }
         }
     }
 }
