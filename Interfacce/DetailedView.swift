@@ -11,7 +11,6 @@ let uiColors: [String: Color] = [
 struct DetailView: View {
     let cloth: Cloth
     
-    // Rimosso `var onDelete: () -> Void` perché ora ci pensa il manager
     @Environment(ClosetManager.self) private var manager
     @Environment(\.dismiss) var dismiss
     

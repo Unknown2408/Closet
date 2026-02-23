@@ -178,7 +178,7 @@ struct NewItemView: View {
                     .disabled(name.isEmpty || selectedColorUI.isEmpty)
                 }
             }
-            .navigationTitle("Aggiungi Capo")
+            .navigationTitle(itemToEdit == nil ? "Aggiungi Capo" : "Modifica Capo")
             .navigationBarItems(leading: Button("Annulla") { dismiss() })
             
             // ALERT: Aggiunta nuovo brand
