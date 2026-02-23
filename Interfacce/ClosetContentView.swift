@@ -40,12 +40,9 @@ struct ClosetContentView: View {
                                 .padding(.top, 10)
                             
                             Spacer()
-                            
-                            // Griglia con i dati reali del ClosetManager
                             // Griglia con i dati reali del ClosetManager
                             LazyVGrid(columns: columns, spacing: 20) {
                                 ForEach(manager.inventory) { item in
-                                    // CANCELLA l'onDelete e lascia solo cloth: item
                                     NavigationLink(destination: DetailView(cloth: item)) {
                                         ClothCard(cloth: item)
                                     }

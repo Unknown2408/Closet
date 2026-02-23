@@ -2,8 +2,6 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var selection = 0
-    // NUOVO: Aggiunta variabile per ricevere il nome inserito
-    let nome: String
     
     var body: some View {
         // La TabView deve stare al "livello più alto"

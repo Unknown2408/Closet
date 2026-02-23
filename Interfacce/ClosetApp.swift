@@ -29,8 +29,7 @@ struct ClosetApp: App {
                         }
                 } else {
                     // 2. HOMEVIEW
-                    // Passiamo "" (stringa vuota) così in automatico leggerà "My Closet"
-                    HomeView(nome: "")
+                    HomeView()
                         .environment(manager)
                         .transition(.opacity)
                 }
