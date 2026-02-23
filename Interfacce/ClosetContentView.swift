@@ -33,24 +33,42 @@ struct ClosetContentView: View {
                     .padding(.horizontal, 25)
                     .padding(.top, 20)
                     
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 15) {
-                            Text("Featured")
-                                .font(.title2.bold())
-                                .padding(.top, 10)
-                            
-                            Spacer()
-                            // Griglia con i dati reali del ClosetManager
-                            LazyVGrid(columns: columns, spacing: 20) {
-                                ForEach(manager.inventory) { item in
-                                    NavigationLink(destination: DetailView(cloth: item)) {
-                                        ClothCard(cloth: item)
+                    // CONTROLLO EMPTY STATE
+                    if manager.inventory.isEmpty {
+                        
+                        // Vista quando l'armadio è vuoto
+                        Spacer()
+                        ContentUnavailableView(
+                            "No Items",
+                            systemImage: "tshirt",
+                            description: Text("Tap the + icon in the top right to add your clothing item!")
+                        )
+                        Spacer()
+                        
+                    } else {
+                        
+                        // Vista normale con la griglia dei vestiti
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: 15) {
+                                Text("Featured")
+                                    .font(.title2.bold())
+                                    .padding(.top, 10)
+                                
+                                Spacer()
+                                
+                                // Griglia con i dati reali del ClosetManager
+                                LazyVGrid(columns: columns, spacing: 20) {
+                                    ForEach(manager.inventory) { item in
+                                        NavigationLink(destination: DetailView(cloth: item)) {
+                                            ClothCard(cloth: item)
+                                        }
+                                        .buttonStyle(PlainButtonStyle())
                                     }
-                                    .buttonStyle(PlainButtonStyle())
                                 }
                             }
+                            .padding(.horizontal, 25) // Allineamento corretto
+                            .padding(.bottom, 20)
                         }
-                        .padding(.horizontal, 25) // Allineamento corretto
                     }
                 }
             }
@@ -60,5 +78,3 @@ struct ClosetContentView: View {
         }
     }
 }
-
-

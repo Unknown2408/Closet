@@ -3,7 +3,7 @@ import UIKit
 
 struct NewItemView: View {
     // MARK: - State Properties
-    @State private var description: String = ""
+    @State private var name: String = ""
     
     @State private var selectedPosition: Position = .top
     @State private var selectedType: ClothingType = .tShirt
@@ -41,7 +41,7 @@ struct NewItemView: View {
             Form {
                 // 1. NOME
                 Section(header: Text("NOME")) {
-                    TextField("Esempio: Camicia di lino", text: $description)
+                    TextField("Esempio: Camicia di lino", text: $name)
                 }
                 
                 // 2. FOTO (Opzionale)
@@ -168,12 +168,12 @@ struct NewItemView: View {
                             .font(.headline)
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity, minHeight: 50)
-                            .background(description.isEmpty || selectedColorUI.isEmpty ? Color.gray : Color.black)
+                            .background(name.isEmpty || selectedColorUI.isEmpty ? Color.gray : Color.black)
                             .cornerRadius(10)
                     }
                     .listRowInsets(EdgeInsets())
                     .buttonStyle(PlainButtonStyle())
-                    .disabled(description.isEmpty || selectedColorUI.isEmpty)
+                    .disabled(name.isEmpty || selectedColorUI.isEmpty)
                 }
             }
             .navigationTitle("Aggiungi Capo")
@@ -216,7 +216,6 @@ struct NewItemView: View {
     }
     
     func saveCloth() {
-        // ... (IL RESTO DI saveCloth() RIMANE IDENTICO A PRIMA) ...
         let finalImageData: Data
         if let uiImage = selectedImage, let data = uiImage.jpegData(compressionQuality: 0.7) {
             finalImageData = data
@@ -253,13 +252,13 @@ struct NewItemView: View {
 
         manager.addItem(
             image: finalImageData,
+            name : name,
             position: selectedPosition,
             type: selectedType,
             season: [selectedSeason],
             coloreIndumento: [finalColor],
             style: [selectedStyle],
-            brand: selectedBrand, // Salva correttamente il brand!
-            description: description
+            brand: selectedBrand,
         )
         
         dismiss()

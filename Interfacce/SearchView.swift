@@ -1,32 +1,26 @@
 import SwiftUI
 
 struct SearchView: View {
-    // 1. Colleghiamo il Manager (per cercare nel database dei vestiti)
     @Environment(ClosetManager.self) var manager
-    
-    // 2. Stato per la barra di ricerca
     @State private var searchText = ""
     
-    // 3. Configurazione Griglia per i risultati (2 colonne)
     let columns = [
         GridItem(.flexible(), spacing: 16),
         GridItem(.flexible(), spacing: 16)
     ]
     
-    // --- LOGICA DI RICERCA (SOLO NOME/BRAND) ---
+    // --- LOGICA DI RICERCA ---
     var searchResults: [Cloth] {
         if searchText.isEmpty {
             return []
         } else {
             return manager.inventory.filter { item in
-                // Cerca ESCLUSIVAMENTE nel nome che hai inserito (brand)
-                // Ignora categorie, colori o ID numerici.
-                item.brand.localizedCaseInsensitiveContains(searchText)
+                item.brand.localizedCaseInsensitiveContains(searchText) ||
+                item.name.localizedCaseInsensitiveContains(searchText)
             }
         }
     }
     
-    // Funzione helper per le immagini delle Categorie
     func imageName(for position: Position) -> String {
         switch position {
         case .top:        return "maglia"
@@ -40,23 +34,26 @@ struct SearchView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 30) {
+            ZStack {
+                Color.white.ignoresSafeArea() // Sfondo bianco universale
+                
+                VStack(alignment: .leading, spacing: 0) {
                     
-                    // TITOLO
-                    Text("My closet")
-                        .font(.system(size: 34, weight: .heavy))
+                    // 1. TITOLO FISSO IN ALTO
+                    Text("My Closet")
+                        .font(.system(size: 40, weight: .bold))
+                        .foregroundColor(.black)
+                        .padding(.horizontal, 25)
                         .padding(.top, 20)
                     
-                    // BARRA DI RICERCA
+                    // 2. BARRA DI RICERCA CUSTOM FISSA
                     HStack {
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(.gray)
                         
-                        // Placeholder
-                        TextField("Search items by name...", text: $searchText)
+                        TextField("Search by name or brand...", text: $searchText)
+                            .submitLabel(.search)
                         
-                        // Tasto X per cancellare
                         if !searchText.isEmpty {
                             Button(action: { searchText = "" }) {
                                 Image(systemName: "xmark.circle.fill")
@@ -68,62 +65,68 @@ struct SearchView: View {
                     .background(Color.white)
                     .clipShape(Capsule())
                     .overlay(Capsule().stroke(Color.black, lineWidth: 2))
+                    .padding(.horizontal, 25)
+                    .padding(.top, 20)
+                    .padding(.bottom, 20) // Spazio prima che inizi lo scroll
                     
-                    // --- LOGICA DI VISUALIZZAZIONE ---
-                    
-                    if searchText.isEmpty {
-                        // CASO A: NESSUNA RICERCA -> MOSTRA LE CATEGORIE
-                        ForEach(Position.allCases) { position in
-                            NavigationLink(destination: CategoryDetailView(selectedPosition: position)) {
-                                HStack(spacing: 20) {
-                                    Image(imageName(for: position))
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 60, height: 60)
-                                    
-                                    Text(position.rawValue)
-                                        .font(.system(size: 24, weight: .bold))
-                                        .foregroundColor(.black)
-                                    
-                                    Spacer()
-                                    
-                                    Image(systemName: "chevron.right")
-                                        .foregroundColor(.gray.opacity(0.5))
-                                }
-                                .padding(.vertical, 8)
-                                .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
-                        }
-                        
-                    } else {
-                        // CASO B: RICERCA ATTIVA -> MOSTRA I RISULTATI
-                        if searchResults.isEmpty {
-                            // Nessun risultato trovato
-                            VStack(spacing: 20) {
-                                Spacer(minLength: 50)
-                                Image(systemName: "magnifyingglass")
-                                    .font(.system(size: 50))
-                                    .foregroundColor(.gray.opacity(0.5))
-                                Text("No items found for \"\(searchText)\"")
-                                    .foregroundColor(.gray)
-                            }
-                            .frame(maxWidth: .infinity)
+                    // 3. SCROLLVIEW (Solo questa parte scorrerà)
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 30) {
                             
-                        } else {
-                            // Griglia dei vestiti trovati
-                            LazyVGrid(columns: columns, spacing: 20) {
-                                ForEach(searchResults) { cloth in
-                                    // Qui usiamo la TUA ClothCard originale senza modifiche
-                                    ClothCard(cloth: cloth)
+                            if searchText.isEmpty {
+                                // CASO A: NESSUNA RICERCA -> MOSTRA LE CATEGORIE
+                                ForEach(Position.allCases) { position in
+                                    NavigationLink(destination: CategoryDetailView(selectedPosition: position)) {
+                                        HStack(spacing: 20) {
+                                            Image(imageName(for: position))
+                                                .resizable()
+                                                .scaledToFit()
+                                                .frame(width: 60, height: 60)
+                                            
+                                            Text(position.rawValue)
+                                                .font(.system(size: 24, weight: .bold))
+                                                .foregroundColor(.black)
+                                            
+                                            Spacer()
+                                            
+                                            Image(systemName: "chevron.right")
+                                                .foregroundColor(.gray.opacity(0.5))
+                                        }
+                                        .padding(.vertical, 8)
+                                        .contentShape(Rectangle())
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            } else {
+                                // CASO B: RICERCA ATTIVA -> MOSTRA I RISULTATI
+                                if searchResults.isEmpty {
+                                    VStack(spacing: 20) {
+                                        Spacer(minLength: 50)
+                                        Image(systemName: "magnifyingglass")
+                                            .font(.system(size: 50))
+                                            .foregroundColor(.gray.opacity(0.5))
+                                        Text("No items found for \"\(searchText)\"")
+                                            .foregroundColor(.gray)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                } else {
+                                    LazyVGrid(columns: columns, spacing: 20) {
+                                        ForEach(searchResults) { cloth in
+                                            NavigationLink(destination: DetailView(cloth: cloth)) {
+                                                ClothCard(cloth: cloth)
+                                            }
+                                            .buttonStyle(PlainButtonStyle())
+                                        }
+                                    }
                                 }
                             }
-                            .padding(.bottom, 20)
                         }
+                        .padding(.horizontal, 25)
+                        .padding(.bottom, 50)
                     }
+                    // Nasconde la tastiera appena si inizia a scorrere in giù
+                    .scrollDismissesKeyboard(.immediately)
                 }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 50)
             }
         }
     }

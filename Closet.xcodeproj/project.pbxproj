@@ -11,7 +11,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		68AF562B2F4C4F1300C79D42 /* Exceptions for "Closet" folder in "Closet" target */ = {
+		68AF56642F4C784700C79D42 /* Exceptions for "Closet" folder in "Closet" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -24,7 +24,7 @@
 		6805D8122F3B3DD600B11B59 /* Closet */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				68AF562B2F4C4F1300C79D42 /* Exceptions for "Closet" folder in "Closet" target */,
+				68AF56642F4C784700C79D42 /* Exceptions for "Closet" folder in "Closet" target */,
 			);
 			path = Closet;
 			sourceTree = "<group>";

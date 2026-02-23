@@ -144,6 +144,7 @@ struct Cloth: Identifiable, Codable {
     var image: Data
     
     // variabili per la ricerca
+    var name: String
     var position : Position
     var type : ClothingType
     var season : [Season]
@@ -157,10 +158,9 @@ struct Cloth: Identifiable, Codable {
 
 struct Outfit: Identifiable, Codable {
     var id = UUID()
-    let outfitName: String
+    var outfitName: String
     
     var items: [UUID]
-    
     var favourite: Bool = false
     var dateCreated: Date = Date()
 }

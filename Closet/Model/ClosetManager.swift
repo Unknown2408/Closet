@@ -105,9 +105,9 @@ import SwiftUI
     }
     
     // Gestione dei vestiti
-    func addItem(image: Data, position: Position, type: ClothingType, season: [Season], coloreIndumento: [coloreIndumento], style: [String], brand: String, description: String) {
+    func addItem(image: Data, name: String, position: Position, type: ClothingType, season: [Season], coloreIndumento: [coloreIndumento], style: [String], brand: String, ) {
         let cleanBrand = brand.trimmingCharacters(in: .whitespacesAndNewlines)
-        let newItem = Cloth(image: image, position: position, type: type, season: season, coloreIndumentoRicerca: coloreIndumento, brand: cleanBrand, style: style)
+        let newItem = Cloth(image: image, name: name, position: position, type: type, season: season, coloreIndumentoRicerca: coloreIndumento, brand: cleanBrand, style: style)
         inventory.append(newItem)
         save()
     }
@@ -131,11 +131,27 @@ import SwiftUI
         }
     }
     
+    func toggleFavorite(ofOutfitWithID id: UUID) { // <-- Guarda qui, ho cambiato il nome!
+            if let index = outfits.firstIndex(where: { $0.id == id }) {
+                outfits[index].favourite.toggle()
+                save()
+            }
+    }
+    
     // Gestione outfit
     func addOutfit(name: String, items: [UUID]) {
         let newOutfit = Outfit(outfitName: name, items: items)
         outfits.append(newOutfit)
         save()
+    }
+    
+    // Funzione per aggiornare un outfit esistente
+    func updateOutfit(id: UUID, newName: String, newItems: [UUID]) {
+        if let index = outfits.firstIndex(where: { $0.id == id }) {
+            outfits[index].outfitName = newName
+            outfits[index].items = newItems
+            save() // Salva sul disco
+        }
     }
     
     func deleteOutfit(id: UUID) {
@@ -148,6 +164,16 @@ import SwiftUI
     func deleteMultipleOutfits(withIds ids: Set<UUID>) {
         outfits = outfits.filter { !ids.contains($0.id) }
         save()
+    }
+    
+    // Funzione per impostare come preferiti più outfit contemporaneamente
+    func markAsFavorite(outfitIDs: Set<UUID>, isFavorite: Bool = true) {
+        for id in outfitIDs {
+            if let index = outfits.firstIndex(where: { $0.id == id }) {
+                outfits[index].favourite = isFavorite
+            }
+        }
+        save() // Salviamo sul disco una sola volta dopo averli modificati tutti!
     }
     
     func items(for outfit: Outfit) -> [Cloth] {

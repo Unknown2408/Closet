@@ -6,24 +6,24 @@ struct ClothCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // Box Immagine
+            
+            // BOX IMMAGINE
             ZStack(alignment: .bottomTrailing) {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color.gray.opacity(0.1))
-                    .aspectRatio(0.85, contentMode: .fit)
+                // 1. Lo sfondo grigio
+                Color.gray.opacity(0.1)
                 
+                // 2. L'immagine
                 if let uiImage = UIImage(data: cloth.image) {
                     Image(uiImage: uiImage)
                         .resizable()
-                        .scaledToFit()
-                        .padding(10)
+                        .scaledToFill()
                 } else {
                     Image(systemName: "tshirt.fill")
                         .foregroundColor(.gray.opacity(0.3))
                         .font(.largeTitle)
                 }
                 
-                // PULSANTE CUORE - STILE APPLE (NERO)
+                // 3. PULSANTE CUORE - STILE APPLE (NERO)
                 Button(action: {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
                         isFavorite.toggle()
@@ -31,20 +31,34 @@ struct ClothCard: View {
                 }) {
                     Image(systemName: isFavorite ? "heart.fill" : "heart")
                         .font(.system(size: 18))
-                        .foregroundColor(.black) // Sempre nero come richiesto
+                        .foregroundColor(.black)
                         .padding(12)
                 }
             }
+            // 4. Forza la proporzione del contenitore
+            .aspectRatio(0.85, contentMode: .fit)
+            // 5. TAGLIA via la parte di foto "strabordante" con i bordi arrotondati
+            .clipShape(RoundedRectangle(cornerRadius: 12))
             
-            // Informazioni Capo
-            VStack(alignment: .leading, spacing: 2) {
+            // INFORMAZIONI CAPO
+            VStack(alignment: .leading, spacing: 3) {
+                // NUOVO: Nome dato dall'utente (Salvato come 'description')
+                Text(cloth.name)
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(.black)
+                    .lineLimit(1)
+                
+                // Brand (Modificato leggermente in grigio per non confonderlo col nome)
                 Text(cloth.brand.uppercased())
                     .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(.black)
+                    .foregroundColor(.gray)
+                    .lineLimit(1)
                 
+                // Tipo
                 Text(cloth.type.rawValue)
                     .font(.system(size: 11))
                     .foregroundColor(.gray)
+                    .lineLimit(1)
             }
             .padding(.horizontal, 4)
         }
