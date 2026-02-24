@@ -14,49 +14,49 @@ struct ClothCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             
-            // BOX IMMAGINE
-            ZStack(alignment: .bottomTrailing) {
-                // 1. Lo sfondo grigio per quando non c'è immagine
-                Color.gray.opacity(0.1)
-                
-                // 2. L'immagine del capo
-                if let uiImage = UIImage(data: cloth.image) {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .scaledToFill()
-                } else {
-                    Image(systemName: "tshirt.fill")
-                        .foregroundColor(.gray.opacity(0.3))
-                        .font(.largeTitle)
-                }
-                
-                // 3. PULSANTE CUORE CON CERCHIO - COLLEGATO AL MANAGER
-                Button(action: {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                        // Modifica direttamente il dato nel manager
-                        manager.toggleFavorite(ofItemWithID: cloth.id)
+            // BOX IMMAGINE INDISTRUTTIBILE
+            Rectangle()
+                .fill(Color.gray.opacity(0.1)) // 1. Lo sfondo base
+                .aspectRatio(0.85, contentMode: .fit) // 2. La proporzione bloccata
+                .overlay {
+                    // 3. L'immagine "spalmata" sopra, forzata al centro
+                    if let uiImage = UIImage(data: cloth.image) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFill()
+                    } else {
+                        // IMMAGINE DI DEFAULT SISTEMATA
+                        Image(systemName: "tshirt.fill")
+                            .resizable()
+                            .scaledToFill()
+                            .padding(40) // Lascia "respirare" l'icona
+                            .foregroundColor(.gray.opacity(0.3))
                     }
-                }) {
-                    Image(systemName: isCurrentFavorite ? "heart.fill" : "heart")
-                        .font(.system(size: 16)) // Dimensione icona
-                        .foregroundColor(.black) // <--- ORA È SEMPRE NERO
-                        .padding(8) // Spazio tra icona e bordo del cerchio
-                        .background(
-                            Circle()
-                                .fill(Color.white) // Sfondo bianco del cerchio
-                                .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1) // Leggera ombra
-                        )
-                        .overlay(
-                            Circle()
-                                .stroke(Color.gray.opacity(0.2), lineWidth: 1) // Sottile bordo grigio
-                        )
                 }
-                .padding(8) // Padding esterno per posizionare il bottone nell'angolo
-            }
-            // 4. Forza la proporzione del contenitore
-            .aspectRatio(0.85, contentMode: .fit)
-            // 5. TAGLIA via la parte di foto "strabordante" con i bordi arrotondati
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+                .clipShape(RoundedRectangle(cornerRadius: 12)) // 4. Taglia l'immagine che straborda
+                .overlay(alignment: .bottomTrailing) {
+                    // 5. IL TUO NUOVO PULSANTE CUORE (Messo come overlay in basso a destra)
+                    Button(action: {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                            manager.toggleFavorite(ofItemWithID: cloth.id)
+                        }
+                    }) {
+                        Image(systemName: isCurrentFavorite ? "heart.fill" : "heart")
+                            .font(.system(size: 16))
+                            .foregroundColor(.black)
+                            .padding(8)
+                            .background(
+                                Circle()
+                                    .fill(Color.white)
+                                    .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
+                            )
+                            .overlay(
+                                Circle()
+                                    .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+                            )
+                    }
+                    .padding(8) // Padding per staccare il bottone dal bordo
+                }
             
             // INFORMAZIONI CAPO
             VStack(alignment: .leading, spacing: 3) {

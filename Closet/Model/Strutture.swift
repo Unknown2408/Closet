@@ -50,10 +50,6 @@ enum ClothingType: String, CaseIterable, Codable, Identifiable {
     case suit = "Suits"
     case robe = "Robes"
     
-    // Activewear (Uncountable nouns, treated as plural context)
-    case activewear = "Activewear"
-    case workwear = "Workwear"
-    
     // Accessories
     case bag = "Bags"
     case tie = "Ties"
@@ -92,12 +88,6 @@ enum ClothingType: String, CaseIterable, Codable, Identifiable {
             
         case .flats, .heels, .sandals, .sneakers, .boots:
             return [.footwear]
-            
-        case .activewear:
-            return [.top, .bottom, .fullbody]
-            
-        case .workwear:
-            return [.top, .bottom, .fullbody, .outerwear]
         }
     }
 }
@@ -135,6 +125,16 @@ enum coloreIndumento: String, CaseIterable, Codable {
     case navy = "Navy"
 }
 
+enum Style: String, CaseIterable, Codable, Identifiable {
+    case streetwear = "Streetwear"
+    case sporty = "Sporty"
+    case elegant = "Elegant"
+    case formal = "Formal"
+    case casual = "Casual"
+    
+    var id: String { self.rawValue }
+}
+
 // Ho aggiunto Identifiable (per le liste UI) e Codable (per il salvataggio)
 struct Cloth: Identifiable, Codable {
     // ID per l'inserimento nell'inventory
@@ -150,7 +150,7 @@ struct Cloth: Identifiable, Codable {
     var season : [Season]
     var coloreIndumentoRicerca: [coloreIndumento]
     var brand: String
-    var style: [String]
+    var style: [Style]
     
     
     var favourite: Bool = false

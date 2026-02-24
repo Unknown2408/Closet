@@ -47,8 +47,7 @@ struct OutfitBuilderFilters: View {
     @Binding var selectedPosition: Position
     @Binding var selectedType: ClothingType?
     @Binding var selectedSeason: Season?
-    @Binding var selectedStyle: String
-    let styles: [String]
+    @Binding var selectedStyle: Style? // Aggiornato per usare il nuovo enum Style?
     
     var body: some View {
         VStack(spacing: 15) {
@@ -92,11 +91,14 @@ struct OutfitBuilderFilters: View {
                     FilterLabel(title: selectedSeason?.rawValue ?? "Season", icon: "leaf")
                 }
                 
-                // Filtro Stile
+                // Filtro Stile (aggiornato con enum)
                 Menu {
-                    ForEach(styles, id: \.self) { s in Button(s) { selectedStyle = s } }
+                    Button("All Styles") { selectedStyle = nil }
+                    ForEach(Style.allCases) { s in
+                        Button(s.rawValue) { selectedStyle = s }
+                    }
                 } label: {
-                    FilterLabel(title: selectedStyle == "All" ? "Style" : selectedStyle, icon: "tag")
+                    FilterLabel(title: selectedStyle?.rawValue ?? "Style", icon: "tag")
                 }
             }
             .padding(.horizontal)

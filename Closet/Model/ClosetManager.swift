@@ -104,8 +104,8 @@ import SwiftUI
         }
     }
     
-    // Gestione dei vestiti
-    func addItem(image: Data, name: String, position: Position, type: ClothingType, season: [Season], coloreIndumento: [coloreIndumento], style: [String], brand: String, ) {
+    // Gestione dei vestiti (Corretto per usare l'enum Style e tolto l'errore di battitura)
+    func addItem(image: Data, name: String, position: Position, type: ClothingType, season: [Season], coloreIndumento: [coloreIndumento], style: [Style], brand: String) {
         let cleanBrand = brand.trimmingCharacters(in: .whitespacesAndNewlines)
         let newItem = Cloth(image: image, name: name, position: position, type: type, season: season, coloreIndumentoRicerca: coloreIndumento, brand: cleanBrand, style: style)
         inventory.append(newItem)
@@ -119,7 +119,8 @@ import SwiftUI
         }
     }
     
-    func updateItem(id: UUID, image: Data, name: String, position: Position, type: ClothingType, season: [Season], coloreIndumento: [coloreIndumento], style: [String], brand: String) {
+    // (Corretto per usare l'enum Style)
+    func updateItem(id: UUID, image: Data, name: String, position: Position, type: ClothingType, season: [Season], coloreIndumento: [coloreIndumento], style: [Style], brand: String) {
             if let index = inventory.firstIndex(where: { $0.id == id }) {
                 let cleanBrand = brand.trimmingCharacters(in: .whitespacesAndNewlines)
                 

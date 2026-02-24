@@ -13,13 +13,14 @@ struct CreateOutfitView: View {
     @State private var selectedPosition: Position = .top
     @State private var selectedType: ClothingType? = nil
     @State private var selectedSeason: Season? = nil
-    @State private var selectedStyle: String = "All"
-    let styles = ["All", "Casual", "Elegant", "Workwear", "Sporty"]
+    
+    // Usa il nuovo enum Style al posto della stringa
+    @State private var selectedStyle: Style? = nil
     
     // --- FILTER LOGIC (Computed Property) ---
     private var filteredInventory: [Cloth] {
         closetManager.inventory.filter { item in
-            // 1. Escludi se già selezionato
+            // 1. Escludi se già selezionato
             let isNotSelected = !selectedItems.contains(where: { $0.id == item.id })
             
             // 2. Filtro Macro-Posizione (es. Tops)
@@ -28,11 +29,11 @@ struct CreateOutfitView: View {
             // 3. Filtro Micro-Tipo (es. T-shirts) - Solo se selezionato
             let matchesType = selectedType == nil || item.type == selectedType
             
-            // 4. Filtro Stagione (item.season è [Season])
+            // 4. Filtro Stagione (item.season è [Season])
             let matchesSeason = selectedSeason == nil || item.season.contains(selectedSeason!)
             
-            // 5. Filtro Stile (item.style è [String])
-            let matchesStyle = selectedStyle == "All" || item.style.contains(selectedStyle)
+            // 5. Filtro Stile (aggiornato con l'enum Style)
+            let matchesStyle = selectedStyle == nil || item.style.contains(selectedStyle!)
             
             return isNotSelected && matchesPosition && matchesType && matchesSeason && matchesStyle
         }
@@ -63,13 +64,12 @@ struct CreateOutfitView: View {
                         Text("Build your look")
                             .font(.title2).bold().padding(.horizontal)
                         
-                        // Passiamo tutti i binding ai filtri
+                        // Passiamo tutti i binding ai filtri (rimosso l'array "styles")
                         OutfitBuilderFilters(
                             selectedPosition: $selectedPosition,
                             selectedType: $selectedType,
                             selectedSeason: $selectedSeason,
-                            selectedStyle: $selectedStyle,
-                            styles: styles
+                            selectedStyle: $selectedStyle
                         )
                         
                         // Griglia dell'armadio filtrata
