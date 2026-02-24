@@ -155,6 +155,7 @@ import SwiftUI
             }
     }
     
+    
     // Gestione outfit
     func addOutfit(name: String, items: [UUID]) {
         let newOutfit = Outfit(outfitName: name, items: items)

@@ -15,7 +15,7 @@ struct DetailView: View {
     @Environment(ClosetManager.self) private var manager
     @Environment(\.dismiss) var dismiss
     
-    @State private var isFavorite: Bool = false
+    // RIMOSSO: @State private var isFavorite ... (Non serve più!)
     @State private var showingEditSheet = false
     @State private var showingMatchesSheet = false
     
@@ -30,13 +30,20 @@ struct DetailView: View {
             HStack(spacing: 20) {
                 Spacer()
                 
+                // --- TASTO PREFERITO MODIFICATO ---
                 Button(action: {
-                    isFavorite.toggle()
-                    // Opzionale: manager.toggleFavorite(ofItemWithID: currentCloth.id)
+                    // Chiama la funzione specifica del tuo ClosetManager
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                        manager.toggleFavorite(ofItemWithID: currentCloth.id)
+                    }
                 }) {
-                    Image(systemName: isFavorite ? "heart.fill" : "heart")
+                    // Usa direttamente i dati di currentCloth
+                    Image(systemName: currentCloth.favourite ? "heart.fill" : "heart")
                         .font(.system(size: 24))
-                        .foregroundColor(.black)
+                        // Diventa ROSSO se preferito, NERO se no
+                        .foregroundColor(.black) 
+                        // Piccolo effetto ingrandimento quando attivo
+                        .scaleEffect(currentCloth.favourite ? 1.1 : 1.0)
                 }
                 
                 Menu {
@@ -77,8 +84,12 @@ struct DetailView: View {
 
                     // 3. Info Prodotto
                     VStack(alignment: .leading, spacing: 5) {
-                        Text(currentCloth.brand)
-                            .font(.title2.bold())
+                        HStack {
+                            Text(currentCloth.brand)
+                                .font(.title2.bold())
+                            Spacer()
+                        }
+                        
                         Text(currentCloth.type.rawValue)
                             .foregroundColor(.secondary)
                     }
@@ -140,9 +151,7 @@ struct DetailView: View {
         }
         .navigationTitle(currentCloth.name)
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            isFavorite = currentCloth.favourite
-        }
+        // RIMOSSO: .onAppear { ... } perché ora currentCloth si aggiorna da solo
         .sheet(isPresented: $showingEditSheet) {
             NewItemView(itemToEdit: currentCloth)
         }
@@ -235,10 +244,8 @@ struct MatchCreationSheet: View {
                 
                 // --- SEZIONE 3: PULSANTE SALVA ---
                 Button(action: {
-                    // Crea l'outfit usando la funzione del tuo manager!
-                    // Esempio fittizio (aggiusta in base alla tua funzione reale):
-                    // manager.createOutfit(items: selectedItems)
-                    
+                    // TODO: Implementare il salvataggio con manager.addOutfit(...)
+                    // Nota: ti servirà un modo per chiedere il nome dell'outfit all'utente
                     print("Salvataggio outfit con \(selectedItems.count) capi!")
                     dismiss()
                 }) {
