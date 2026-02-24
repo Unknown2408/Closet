@@ -201,50 +201,50 @@ import SwiftUI
     
     // COLOR MATCHING
     func getCascadingSuggestions(for selectedItems: [Cloth]) -> [Cloth] {
-            guard !selectedItems.isEmpty else { return [] }
-            
-            let occupiedPositions = selectedItems.map { $0.position }
-            var commonValidColors: Set<String> = []
-            
-            if let firstItem = selectedItems.first,
-               let firstColor = firstItem.coloreIndumentoRicerca.first {
-                let compatibleWithFirst = colorRules[firstColor.rawValue] ?? []
-                commonValidColors = Set(compatibleWithFirst)
-            }
-            
-            for item in selectedItems.dropFirst() {
-                if let color = item.coloreIndumentoRicerca.first {
-                    let colorString: String = color.rawValue
-                    let arrayColoriCompatibili: [String] = colorRules[colorString] ?? []
-                    let compatibleWithItem: Set<String> = Set(arrayColoriCompatibili)
-                    commonValidColors.formIntersection(compatibleWithItem)
-                }
-            }
-            
-            let suggestions = inventory.filter { item in
+        guard !selectedItems.isEmpty else { return [] }
                 
-                // ⭐️ REGOLA DEL LAYERING E DEGLI ACCESSORI:
-                let isPositionFree: Bool
+        let occupiedPositions = selectedItems.map { $0.position }
+        var commonValidColors: Set<String> = []
                 
-                if item.position == .top {
-                    // Massimo 2 Top sovrapposti (es. T-shirt + Cardigan)
-                    let topCount = occupiedPositions.filter { $0 == .top }.count
-                    isPositionFree = topCount < 2
-                } else if item.position == .accessories {
-                    // Nessun limite per gli accessori! L'utente può aggiungerne quanti ne vuole
-                    isPositionFree = true
-                } else {
-                    // Per pantaloni, scarpe e giacche: limite ferreo di 1 solo capo
-                    isPositionFree = !occupiedPositions.contains(item.position)
-                }
-                
-                let hasValidColor = item.coloreIndumentoRicerca.contains { color in
-                    commonValidColors.contains(color.rawValue)
-                }
-                
-                return isPositionFree && hasValidColor
-            }
-            
-            return suggestions
+        if let firstItem = selectedItems.first,
+           let firstColor = firstItem.coloreIndumentoRicerca.first {
+            let compatibleWithFirst = colorRules[firstColor.rawValue] ?? []
+            commonValidColors = Set(compatibleWithFirst)
         }
+                
+        for item in selectedItems.dropFirst() {
+            if let color = item.coloreIndumentoRicerca.first {
+                let colorString: String = color.rawValue
+                let arrayColoriCompatibili: [String] = colorRules[colorString] ?? []
+                let compatibleWithItem: Set<String> = Set(arrayColoriCompatibili)
+                commonValidColors.formIntersection(compatibleWithItem)
+            }
+        }
+                
+        let suggestions = inventory.filter { item in
+                    
+            // ⭐️ NUOVA REGOLA DEL LAYERING:
+            let isPositionFree: Bool
+                        
+            if item.position == .outerwear {
+                // Massimo 2 Outerwear sovrapposti (es. Hoodie + Jacket)
+                let outerwearCount = occupiedPositions.filter { $0 == .outerwear }.count
+                isPositionFree = outerwearCount < 2
+            } else if item.position == .accessories {
+                // Nessun limite per gli accessori!
+                isPositionFree = true
+            } else {
+                // Per tops, pantaloni e scarpe: limite ferreo di 1 solo capo
+                isPositionFree = !occupiedPositions.contains(item.position)
+            }
+                        
+            let hasValidColor = item.coloreIndumentoRicerca.contains { color in
+                commonValidColors.contains(color.rawValue)
+            }
+                        
+            return isPositionFree && hasValidColor
+        }
+                
+        return suggestions
+    }
 }

@@ -5,9 +5,10 @@ import SwiftUI
 // 1. SEASONS (Stagioni)
 enum Season: String, CaseIterable, Codable {
     case winter = "Winter"
-    case summer = "Summer"
-    case fall = "Fall"   // "Autumn" va bene pure, ma Fall è standard US
     case spring = "Spring"
+    case summer = "Summer"
+    case fall = "Fall"
+    case allSeasons = "All Seasons"
 }
 
 // 2. POSITION (Macro-Categorie)
@@ -15,11 +16,10 @@ enum Position: String, CaseIterable, Codable, Identifiable {
     case top = "Tops"
     case bottom = "Bottoms"
     case footwear = "Footwear"
-    case outerwear = "Outerwear" // Corretto da "Outwear"
+    case outerwear = "Outerwear"
     case accessories = "Accessories"
     case fullbody = "Fullbody"
     
-    // ID che ritorna il valore della stringa associata
     var id: String { self.rawValue }
 }
 
@@ -28,18 +28,18 @@ enum ClothingType: String, CaseIterable, Codable, Identifiable {
     // TOP
     case tShirt = "T-shirts"
     case shirt = "Shirts"
-    case sweater = "Sweaters"
-    case tops = "Tops" // Mantenuto come richiesto
-    case cardigan = "Cardigans"
-    case hoodie = "Hoodies"
+    case tops = "Tops"
     
     // Bottoms
     case skirt = "Skirts"
-    case trousers = "Trousers" // o "Pants"
+    case trousers = "Trousers"
     case shorts = "Shorts"
     case jeans = "Jeans"
     
     // Outerwear
+    case sweater = "Sweaters"
+    case cardigan = "Cardigans"
+    case hoodie = "Hoodies"
     case coat = "Coats"
     case jacket = "Jackets"
     case cape = "Capes"
@@ -68,16 +68,16 @@ enum ClothingType: String, CaseIterable, Codable, Identifiable {
     
     var id: String { self.rawValue }
     
-    // LOGICA DELLE POSIZIONI
+    // LOGICA DELLE POSIZIONI AGGIORNATA
     var possiblePositions: [Position] {
         switch self {
-        case .tShirt, .shirt, .sweater, .cardigan, .hoodie, .tops:
+        case .tShirt, .shirt, .tops:
             return [.top]
             
         case .skirt, .trousers, .shorts, .jeans:
             return [.bottom]
             
-        case .coat, .jacket, .cape:
+        case .sweater, .cardigan, .hoodie, .coat, .jacket, .cape:
             return [.outerwear]
             
         case .dress, .jumpsuit, .suit, .robe:
@@ -92,31 +92,22 @@ enum ClothingType: String, CaseIterable, Codable, Identifiable {
     }
 }
 
-// 4. COLORI (Espanso a 20 colori per combaciare con la UI)
+// 4. COLORI E STILI
 enum coloreIndumento: String, CaseIterable, Codable {
-    // Scala di grigi e neutri
     case white = "White"
     case lightGray = "Light Gray"
     case gray = "Gray"
     case darkGray = "Dark Gray"
     case black = "Black"
-    
-    // Marroni e Beige
     case beige = "Beige"
     case brown = "Brown"
-    
-    // Rossi, Rosa e Viola
     case red = "Red"
     case maroon = "Maroon"
     case pink = "Pink"
     case purple = "Purple"
     case magenta = "Magenta"
-    
-    // Gialli e Arancioni
     case orange = "Orange"
     case yellow = "Yellow"
-    
-    // Verdi e Blu
     case green = "Green"
     case olive = "Olive"
     case teal = "Teal"
@@ -135,15 +126,9 @@ enum Style: String, CaseIterable, Codable, Identifiable {
     var id: String { self.rawValue }
 }
 
-// Ho aggiunto Identifiable (per le liste UI) e Codable (per il salvataggio)
 struct Cloth: Identifiable, Codable {
-    // ID per l'inserimento nell'inventory
     var id = UUID()
-    
-    // immagine associata
     var image: Data
-    
-    // variabili per la ricerca
     var name: String
     var position : Position
     var type : ClothingType
@@ -151,15 +136,12 @@ struct Cloth: Identifiable, Codable {
     var coloreIndumentoRicerca: [coloreIndumento]
     var brand: String
     var style: [Style]
-    
-    
     var favourite: Bool = false
 }
 
 struct Outfit: Identifiable, Codable {
     var id = UUID()
     var outfitName: String
-    
     var items: [UUID]
     var favourite: Bool = false
     var dateCreated: Date = Date()

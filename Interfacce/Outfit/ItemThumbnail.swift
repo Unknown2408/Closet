@@ -60,7 +60,6 @@ struct ItemThumbnail: View {
                 
                 let targetSize = CGSize(width: 160, height: 160)
                 
-                // ⭐️ CORREZIONE: Usiamo 'preparingThumbnail' (sincrono) perché siamo già in un Task background!
                 let thumbnail = originalImage.preparingThumbnail(of: targetSize) ?? originalImage
                 
                 // Riporta l'immagine ottimizzata sul thread principale per visualizzarla

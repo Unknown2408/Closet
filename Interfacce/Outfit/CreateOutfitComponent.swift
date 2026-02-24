@@ -31,7 +31,7 @@ struct SelectedItemsHeader: View {
                 }
                 
                 Button(action: { withAnimation { isMatchingEnabled.toggle() }}) {
-                    Label(isMatchingEnabled ? "Hide Match" : "Magic Match ✨", systemImage: "sparkles")
+                    Label(isMatchingEnabled ? "Hide Match" : "Magic Match", systemImage: "sparkles")
                         .frame(maxWidth: .infinity).font(.headline)
                 }
                 .buttonStyle(.borderedProminent)
@@ -73,17 +73,16 @@ struct OutfitBuilderFilters: View {
             HStack(spacing: 10) {
                 // Filtro Tipo (dinamico)
                 Menu {
-                    Button("All Types") { selectedType = nil }
                     ForEach(ClothingType.allCases.filter { $0.possiblePositions.contains(selectedPosition) }) { type in
                         Button(type.rawValue) { selectedType = type }
                     }
+                    Button("All Types") { selectedType = nil }
                 } label: {
                     FilterLabel(title: selectedType?.rawValue ?? "Type", icon: "line.3.horizontal.decrease")
                 }
                 
                 // Filtro Stagione
                 Menu {
-                    Button("All Seasons") { selectedSeason = nil }
                     ForEach(Season.allCases, id: \.self) { s in
                         Button(s.rawValue) { selectedSeason = s }
                     }
@@ -93,10 +92,10 @@ struct OutfitBuilderFilters: View {
                 
                 // Filtro Stile (aggiornato con enum)
                 Menu {
-                    Button("All Styles") { selectedStyle = nil }
                     ForEach(Style.allCases) { s in
                         Button(s.rawValue) { selectedStyle = s }
                     }
+                    Button("All Styles") { selectedStyle = nil }
                 } label: {
                     FilterLabel(title: selectedStyle?.rawValue ?? "Style", icon: "tag")
                 }
@@ -153,7 +152,7 @@ struct MagicMatchList: View {
     var body: some View {
         if !items.isEmpty {
             VStack(alignment: .leading) {
-                Text("Suggested for you ✨").font(.headline).padding(.horizontal)
+                Text("Suggested for you").font(.headline).padding(.horizontal)
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 15) {
                         ForEach(items) { item in
