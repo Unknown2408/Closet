@@ -1,7 +1,7 @@
 import SwiftUI
 import UIKit
 import Combine
-import PhotosUI 
+import PhotosUI
 
 struct NewItemView: View {
     var itemToEdit: Cloth? = nil
@@ -24,7 +24,10 @@ struct NewItemView: View {
     @State private var selectedImage: UIImage? = nil
     @State private var showCamera = false
     
-    // 1. Qui c'è la variabile per il Picker della galleria
+    // MARK: - FIX GALLERIA
+    // 1. Variabile per controllare l'apertura della galleria
+    @State private var showPhotoLibrary = false
+    // 2. Variabile per l'item selezionato
     @State private var pickerItem: PhotosPickerItem? = nil
     
     @State private var isKeyboardVisible = false
@@ -32,7 +35,6 @@ struct NewItemView: View {
     @Environment(ClosetManager.self) private var manager
     @Environment(\.dismiss) var dismiss
     
-    // ... [Colori e GridItem rimangono invariati] ...
     let uiColors: [String: Color] = [
         "WHITE": .white, "LIGHT GRAY": Color(white: 0.8), "GRAY": .gray, "DARK GRAY": Color(white: 0.2), "BLACK": .black,
         "RED": .red, "MAROON": Color(red: 0.5, green: 0, blue: 0), "ORANGE": .orange, "BEIGE": Color(red: 0.96, green: 0.96, blue: 0.86), "YELLOW": .yellow,
@@ -49,9 +51,8 @@ struct NewItemView: View {
                     TextField("Esempio: Camicia di lino", text: $name)
                 }
                 
-                // MARK: - SEZIONE FOTO AGGIORNATA
+                // MARK: - SEZIONE FOTO
                 Section {
-                    // Utilizziamo un Menu per dare le opzioni stile Apple
                     Menu {
                         // Opzione 1: Fotocamera
                         Button(action: {
@@ -61,17 +62,20 @@ struct NewItemView: View {
                             Label("Scatta Foto", systemImage: "camera")
                         }
                         
-                        // Opzione 2: Galleria (Usa pickerItem)
-                        PhotosPicker(selection: $pickerItem, matching: .images) {
+                        // Opzione 2: Galleria (FIX APPLICATO)
+                        // Usiamo un pulsante normale per attivare il booleano
+                        Button(action: {
+                            showPhotoLibrary = true
+                        }) {
                             Label("Scegli dalla Libreria", systemImage: "photo.on.rectangle")
                         }
                         
-                        // Opzione 3: Rimuovi (Visibile solo se c'è una foto)
+                        // Opzione 3: Rimuovi
                         if selectedImage != nil {
                             Button(role: .destructive) {
                                 withAnimation {
                                     selectedImage = nil
-                                    pickerItem = nil // Resetta anche il picker
+                                    pickerItem = nil
                                 }
                             } label: {
                                 Label("Rimuovi Foto", systemImage: "trash")
@@ -79,12 +83,10 @@ struct NewItemView: View {
                         }
                         
                     } label: {
-                        // L'aspetto del bottone nel form
                         HStack {
                             Image(systemName: "camera.fill")
                             Text(selectedImage == nil ? "Aggiungi Foto" : "Cambia Foto")
                             Spacer()
-                            // Icona chevron per indicare che è un menu (opzionale)
                             Image(systemName: "chevron.up.chevron.down")
                                 .font(.caption)
                                 .foregroundColor(.gray)
@@ -96,6 +98,8 @@ struct NewItemView: View {
                         CameraPicker(image: $selectedImage)
                             .ignoresSafeArea()
                     }
+                    // Presentazione Galleria (FIX: Spostato qui come modifier)
+                    .photosPicker(isPresented: $showPhotoLibrary, selection: $pickerItem, matching: .images)
                     
                     // Anteprima Immagine
                     if let image = selectedImage {
@@ -105,11 +109,9 @@ struct NewItemView: View {
                             .frame(height: 200)
                             .cornerRadius(10)
                             .clipped()
-                            .listRowInsets(EdgeInsets()) // Toglie i bordi standard della lista per l'immagine
+                            .listRowInsets(EdgeInsets())
                     }
                 }
-                
-                // ... [Il resto delle Section: CATEGORIA, STYLE, COLORE, BRAND, SEASON rimane invariato] ...
                 
                 Section(header: Text("CATEGORIA")) {
                     Picker("Posizione", selection: $selectedPosition) {
@@ -180,7 +182,6 @@ struct NewItemView: View {
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle(itemToEdit == nil ? "Aggiungi Capo" : "Modifica Capo")
             .navigationBarItems(leading: Button("Annulla") { dismiss() })
-            // ... [Alert e Gesture rimangono invariati] ...
             .alert("Nuovo Brand", isPresented: $showingAddBrandAlert) {
                 TextField("Nome brand", text: $newBrandName)
                 Button("Annulla", role: .cancel) {
@@ -214,21 +215,17 @@ struct NewItemView: View {
                     }
                 }
         )
-        // Listener Tastiera
         .onReceive(Publishers.Merge(
             NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification).map { _ in true },
             NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification).map { _ in false }
         )) { isVisible in
             self.isKeyboardVisible = isVisible
         }
-        // MARK: - GESTIONE CARICAMENTO FOTO DALLA GALLERIA
-        // Questo osserva quando l'utente seleziona una foto dal picker
+        // MARK: - GESTIONE CARICAMENTO FOTO (Logica)
         .onChange(of: pickerItem) { _, newItem in
             Task {
-                // Carica i dati come oggetto trasferibile
                 if let data = try? await newItem?.loadTransferable(type: Data.self),
                    let uiImage = UIImage(data: data) {
-                    // Aggiorna l'immagine sul thread principale
                     await MainActor.run {
                         self.selectedImage = uiImage
                     }
@@ -236,7 +233,6 @@ struct NewItemView: View {
             }
         }
         .onAppear {
-            // ... [Caricamento dati item esistente invariato] ...
             if let cloth = itemToEdit {
                 name = cloth.name
                 selectedPosition = cloth.position
@@ -252,8 +248,6 @@ struct NewItemView: View {
             }
         }
     }
-    
-    // ... [Funzioni hideKeyboard, colorSection, isColorDark, saveCloth rimangono invariate] ...
     
     private func hideKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
@@ -290,7 +284,6 @@ struct NewItemView: View {
     }
 
     func saveCloth() {
-        // Logica salvataggio identica a prima
         let finalImageData: Data
         if let uiImage = selectedImage, let data = uiImage.jpegData(compressionQuality: 0.7) {
             finalImageData = data
@@ -354,7 +347,7 @@ struct NewItemView: View {
     }
 }
 
-// CameraPicker rimane invariato
+// CameraPicker
 struct CameraPicker: UIViewControllerRepresentable {
     @Binding var image: UIImage?
     @Environment(\.dismiss) var dismiss
