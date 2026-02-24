@@ -9,6 +9,9 @@ struct ClosetContentView: View {
     @State private var selectedStyle: Style? = nil
     @State private var selectedBrand: String? = nil
     
+    // NUOVO STATO: Filtro Preferiti
+    @State private var showFavoritesOnly = false
+    
     // Configurazione griglia a 2 colonne
     let columns = [
         GridItem(.flexible(), spacing: 16),
@@ -25,7 +28,12 @@ struct ClosetContentView: View {
             // 3. Filtro Brand
             let matchesBrand = selectedBrand == nil || item.brand == selectedBrand
             
-            return matchesSeason && matchesStyle && matchesBrand
+            // 4. NUOVO FILTRO PREFERITI
+            // Se showFavoritesOnly è true, l'item deve essere preferito.
+            // Se è false, accettiamo tutto.
+            let matchesFavorite = !showFavoritesOnly || item.favourite
+            
+            return matchesSeason && matchesStyle && matchesBrand && matchesFavorite
         }
     }
     
@@ -35,7 +43,7 @@ struct ClosetContentView: View {
                 SwiftUI.Color.white.ignoresSafeArea()
                 
                 VStack(alignment: .leading, spacing: 0) {
-                    // Header: My Closet + Pulsante per aggiungere
+                    // Header: My Closet + Pulsanti
                     HStack {
                         Text("My Closet")
                             .font(.system(size: 40, weight: .bold))
@@ -43,6 +51,19 @@ struct ClosetContentView: View {
                         
                         Spacer()
                         
+                        // MARK: - BUTTON PREFERITI (Cuore)
+                        Button(action: {
+                            withAnimation {
+                                showFavoritesOnly.toggle()
+                            }
+                        }) {
+                            Image(systemName: showFavoritesOnly ? "heart.fill" : "heart")
+                                .font(.system(size: 24))
+                                .foregroundColor(.black)
+                        }
+                        .padding(.trailing, 16) // Un po' di spazio tra il cuore e il +
+                        
+                        // BUTTON AGGIUNGI (+)
                         Button(action: { showingAddItem = true }) {
                             Image(systemName: "plus.circle.fill")
                                 .font(.system(size: 24))
@@ -53,10 +74,9 @@ struct ClosetContentView: View {
                     .padding(.top, 16)
                     .padding(.bottom, 10)
                     
-                    // CONTROLLO EMPTY STATE (Se l'armadio è vuoto davvero, non se è vuoto per i filtri)
+                    // CONTROLLO EMPTY STATE (Se l'armadio è vuoto davvero)
                     if manager.inventory.isEmpty {
                         
-                        // Vista quando l'armadio è vuoto
                         Spacer()
                         ContentUnavailableView(
                             "No Items",
@@ -71,13 +91,14 @@ struct ClosetContentView: View {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 10) {
                                 
-                                // 1. Tasto Reset (appare solo se c'è un filtro attivo)
-                                if selectedSeason != nil || selectedStyle != nil || selectedBrand != nil {
+                                // 1. Tasto Reset (appare se c'è un filtro attivo O se i preferiti sono attivi)
+                                if selectedSeason != nil || selectedStyle != nil || selectedBrand != nil || showFavoritesOnly {
                                     Button(action: {
                                         withAnimation {
                                             selectedSeason = nil
                                             selectedStyle = nil
                                             selectedBrand = nil
+                                            showFavoritesOnly = false // Resetta anche il cuore
                                         }
                                     }) {
                                         Image(systemName: "xmark.circle.fill")
@@ -129,16 +150,22 @@ struct ClosetContentView: View {
                             .padding(.vertical, 10)
                         }
                         
-                        // Vista normale con la griglia dei vestiti
+                        // Vista griglia
                         ScrollView {
                             VStack(alignment: .leading, spacing: 15) {
                                 
-                                // Mostra il numero di capi trovati se stiamo filtrando
-                                if selectedSeason != nil || selectedStyle != nil || selectedBrand != nil {
-                                    Text("Found: \(filteredInventory.count)")
-                                        .font(.subheadline)
-                                        .foregroundColor(.gray)
-                                        .padding(.horizontal)
+                                // Mostra info filtri
+                                if selectedSeason != nil || selectedStyle != nil || selectedBrand != nil || showFavoritesOnly {
+                                    HStack {
+                                        Text("Found: \(filteredInventory.count)")
+                                        if showFavoritesOnly {
+                                            Text("(Favorites)")
+                                                .italic()
+                                        }
+                                    }
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                                    .padding(.horizontal)
                                 } else {
                                     Text("Featured")
                                         .font(.title2.bold())
@@ -146,7 +173,7 @@ struct ClosetContentView: View {
                                         .padding(.horizontal)
                                 }
                                 
-                                // Griglia con i dati FILTRATI
+                                // Griglia FILTRATA
                                 LazyVGrid(columns: columns, spacing: 20) {
                                     ForEach(filteredInventory) { item in
                                         NavigationLink(destination: DetailedView(cloth: item)) {
@@ -169,7 +196,7 @@ struct ClosetContentView: View {
     }
 }
 
-// MARK: - Componente Visivo Isoletta
+// FilterChipView rimane invariata
 struct FilterChipView: View {
     let title: String
     let isSelected: Bool
