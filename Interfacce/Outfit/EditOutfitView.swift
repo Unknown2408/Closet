@@ -2,49 +2,49 @@ import SwiftUI
 import UIKit
 
 struct EditOutfitView: View {
-    // Accesso al cervello dell'app
+    // Access to app logic
     @Environment(ClosetManager.self) var closetManager
-    // Variabile di sistema per chiudere la modale
+    // System variable to close the modal
     @Environment(\.dismiss) var dismiss
     
-    // L'ID dell'outfit che stiamo modificando
+    // The ID of the outfit being edited
     let outfitId: UUID
     
-    // Variabili di stato interne per la modifica temporanea
+    // Internal state variables for temporary editing
     @State private var outfitName: String = ""
     @State private var selectedItems: [Cloth] = []
     
-    // Controlla se l'utente ha richiesto i suggerimenti
+    // Controls if the user requested suggestions
     @State private var isMatchingEnabled: Bool = false
     
-    // --- 1. NUOVE VARIABILI DI STATO PER I FILTRI ---
+    // --- 1. FILTER STATE VARIABLES ---
     @State private var selectedPosition: Position = .top
     @State private var selectedType: ClothingType? = nil
     @State private var selectedSeason: Season? = nil
     @State private var selectedStyle: Style? = nil
     
-    // --- 2. LOGICA DI FILTRAGGIO (Identica a CreateOutfitView) ---
+    // --- 2. FILTER LOGIC (Identical to CreateOutfitView) ---
     private var filteredInventory: [Cloth] {
         
-        // ⚡️ OTTIMIZZAZIONE: Creiamo un Set di ID.
-        // La ricerca dentro un Set è istantanea, evitando che l'app "scatti" quando hai tanti vestiti!
+        // ⚡️ OPTIMIZATION: Create a Set of IDs.
+        // Searching inside a Set is instantaneous, preventing UI lag.
         let selectedItemIDs = Set(selectedItems.map { $0.id })
         
         return closetManager.inventory.filter { item in
             
-            // 1. Escludi se già selezionato (ora è velocissimo)
+            // 1. Exclude if already selected
             let isNotSelected = !selectedItemIDs.contains(item.id)
                 
-            // 2. Filtro Macro-Posizione (es. Tops)
+            // 2. Macro-Position Filter (e.g., Tops)
             let matchesPosition = item.type.possiblePositions.contains(selectedPosition)
             
-            // 3. Filtro Micro-Tipo (es. T-shirts) - Solo se selezionato
+            // 3. Micro-Type Filter (e.g., T-shirts) - Only if selected
             let matchesType = selectedType == nil || item.type == selectedType
             
-            // 4. Filtro Stagione (item.season è [Season])
+            // 4. Season Filter (item.season is [Season])
             let matchesSeason = selectedSeason == nil || item.season.contains(selectedSeason!)
                 
-            // 5. Filtro Stile (aggiornato con l'enum Style)
+            // 5. Style Filter (updated with Style enum)
             let matchesStyle = selectedStyle == nil || item.style.contains(selectedStyle!)
                 
             return isNotSelected && matchesPosition && matchesType && matchesSeason && matchesStyle
@@ -56,26 +56,26 @@ struct EditOutfitView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 25) {
                     
-                    // 1. NOME OUTFIT
+                    // 1. OUTFIT NAME
                     VStack(alignment: .leading) {
-                        Text("Nome Outfit")
+                        Text("Outfit Name")
                             .font(.headline)
-                        TextField("Es. Ufficio, Uscita Serale...", text: $outfitName)
+                        TextField("e.g. Office, Night Out...", text: $outfitName)
                             .textFieldStyle(.roundedBorder)
                     }
                     .padding(.horizontal)
                     
-                    // 2. CAPI SELEZIONATI (Si mostra solo se c'è qualcosa)
+                    // 2. SELECTED ITEMS (Shown only if not empty)
                     if !selectedItems.isEmpty {
                         VStack(alignment: .leading) {
-                            Text("L'outfit in costruzione (\(selectedItems.count))")
+                            Text("Outfit in progress (\(selectedItems.count))")
                                 .font(.headline)
                                 .padding(.horizontal)
                             
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 15) {
                                     ForEach(selectedItems) { item in
-                                        // Usa il componente ItemThumbnail per rimuovere
+                                        // Use ItemThumbnail component for removal
                                         ItemThumbnail(cloth: item, actionIcon: "minus.circle.fill") {
                                             withAnimation {
                                                 selectedItems.removeAll { $0.id == item.id }
@@ -90,13 +90,13 @@ struct EditOutfitView: View {
                             }
                         }
                         
-                        // IL PULSANTE "MATCH"
+                        // MAGIC MATCH BUTTON
                         Button(action: {
                             withAnimation(.easeInOut) {
                                 isMatchingEnabled.toggle()
                             }
                         }) {
-                            Text(isMatchingEnabled ? "Nascondi Match" : "Match")
+                            Text(isMatchingEnabled ? "Hide Match" : "Magic Match ✨")
                                 .font(.headline)
                                 .fontWeight(.semibold)
                                 .foregroundColor(.white)
@@ -107,14 +107,14 @@ struct EditOutfitView: View {
                         .padding(.horizontal)
                     }
                     
-                    // 3. MAGIA: SUGGERIMENTI DI MATCHING A CASCATA
+                    // 3. MAGIC MATCH SUGGESTIONS
                     if isMatchingEnabled && !selectedItems.isEmpty {
                         
                         let suggestions = closetManager.getCascadingSuggestions(for: selectedItems)
                         
                         if !suggestions.isEmpty {
                             VStack(alignment: .leading) {
-                                Text("Consigliati per questo outfit ✨")
+                                Text("Suggested for this outfit ✨")
                                     .font(.headline)
                                     .padding(.horizontal)
                                 
@@ -135,7 +135,7 @@ struct EditOutfitView: View {
                             .background(Color.yellow.opacity(0.1))
                             .transition(.move(edge: .top).combined(with: .opacity))
                         } else {
-                            Text("Nessun capo perfetto trovato per questo abbinamento.")
+                            Text("No perfect match found for this combination.")
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                                 .padding(.horizontal)
@@ -145,12 +145,12 @@ struct EditOutfitView: View {
                     
                     Divider().padding(.horizontal)
                     
-                    // 4. THE BUILDER (Filtri + Griglia Dinamica)
+                    // 4. THE BUILDER (Filters + Dynamic Grid)
                     VStack(alignment: .leading, spacing: 20) {
-                        Text("Aggiungi capi")
+                        Text("Build your look")
                             .font(.title2).bold().padding(.horizontal)
                         
-                        // Inseriamo il componente filtri
+                        // Filters component
                         OutfitBuilderFilters(
                             selectedPosition: $selectedPosition,
                             selectedType: $selectedType,
@@ -158,7 +158,7 @@ struct EditOutfitView: View {
                             selectedStyle: $selectedStyle
                         )
                         
-                        // Inseriamo la griglia con l'inventario filtrato
+                        // Grid with filtered inventory
                         ClosetSelectionGrid(items: filteredInventory) { item in
                             withAnimation { selectedItems.append(item) }
                         }
@@ -166,10 +166,10 @@ struct EditOutfitView: View {
                 }
                 .padding(.vertical)
             }
-            .navigationTitle("Modifica Outfit")
+            .navigationTitle("Edit Outfit")
             .navigationBarTitleDisplayMode(.inline)
             
-            // 5. CARICAMENTO DATI INIZIALI
+            // 5. LOAD INITIAL DATA
             .onAppear {
                 if let outfit = closetManager.outfits.first(where: { $0.id == outfitId }) {
                     outfitName = outfit.outfitName
@@ -177,16 +177,16 @@ struct EditOutfitView: View {
                 }
             }
             
-            // 6. TOOLBAR (Annulla / Salva)
+            // 6. TOOLBAR (Cancel / Save)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annulla") {
+                    Button("Cancel") {
                         dismiss()
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Salva") {
-                        let finalName = outfitName.trimmingCharacters(in: .whitespaces).isEmpty ? "Outfit Modificato" : outfitName
+                    Button("Save") {
+                        let finalName = outfitName.trimmingCharacters(in: .whitespaces).isEmpty ? "Edited Outfit" : outfitName
                         let itemsIds = selectedItems.map { $0.id }
                         closetManager.updateOutfit(id: outfitId, newName: finalName, newItems: itemsIds)
                         dismiss()

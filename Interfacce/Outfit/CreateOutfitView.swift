@@ -14,36 +14,36 @@ struct CreateOutfitView: View {
     @State private var selectedType: ClothingType? = nil
     @State private var selectedSeason: Season? = nil
     
-    // Usa il nuovo enum Style al posto della stringa
+    // Use the Style enum for filtering
     @State private var selectedStyle: Style? = nil
     
     // --- FILTER LOGIC (Computed Property) ---
-        private var filteredInventory: [Cloth] {
+    private var filteredInventory: [Cloth] {
+        
+        // ⚡️ OPTIMIZATION: Create a Set of IDs.
+        // Searching inside a Set is instantaneous, preventing UI lag when inventory is large.
+        let selectedItemIDs = Set(selectedItems.map { $0.id })
+        
+        return closetManager.inventory.filter { item in
             
-            // ⚡️ OTTIMIZZAZIONE: Creiamo un Set di ID.
-            // La ricerca dentro un Set è istantanea, evitando che l'app "scatti" quando hai tanti vestiti!
-            let selectedItemIDs = Set(selectedItems.map { $0.id })
+            // 1. Exclude if already selected
+            let isNotSelected = !selectedItemIDs.contains(item.id)
             
-            return closetManager.inventory.filter { item in
-                
-                // 1. Escludi se già selezionato (ora è velocissimo)
-                let isNotSelected = !selectedItemIDs.contains(item.id)
-                
-                // 2. Filtro Macro-Posizione (es. Tops)
-                let matchesPosition = item.type.possiblePositions.contains(selectedPosition)
-                
-                // 3. Filtro Micro-Tipo (es. T-shirts) - Solo se selezionato
-                let matchesType = selectedType == nil || item.type == selectedType
-                
-                // 4. Filtro Stagione (item.season è [Season])
-                let matchesSeason = selectedSeason == nil || item.season.contains(selectedSeason!)
-                
-                // 5. Filtro Stile (aggiornato con l'enum Style)
-                let matchesStyle = selectedStyle == nil || item.style.contains(selectedStyle!)
-                
-                return isNotSelected && matchesPosition && matchesType && matchesSeason && matchesStyle
-            }
+            // 2. Macro-Position Filter (e.g., Tops)
+            let matchesPosition = item.type.possiblePositions.contains(selectedPosition)
+            
+            // 3. Micro-Type Filter (e.g., T-shirts) - Only if a specific type is selected
+            let matchesType = selectedType == nil || item.type == selectedType
+            
+            // 4. Season Filter (item.season is an array [Season])
+            let matchesSeason = selectedSeason == nil || item.season.contains(selectedSeason!)
+            
+            // 5. Style Filter (using Style enum)
+            let matchesStyle = selectedStyle == nil || item.style.contains(selectedStyle!)
+            
+            return isNotSelected && matchesPosition && matchesType && matchesSeason && matchesStyle
         }
+    }
     
     var body: some View {
         NavigationStack {
@@ -70,7 +70,7 @@ struct CreateOutfitView: View {
                         Text("Build your look")
                             .font(.title2).bold().padding(.horizontal)
                         
-                        // Passiamo tutti i binding ai filtri (rimosso l'array "styles")
+                        // Pass all bindings to the filter component
                         OutfitBuilderFilters(
                             selectedPosition: $selectedPosition,
                             selectedType: $selectedType,
@@ -78,7 +78,7 @@ struct CreateOutfitView: View {
                             selectedStyle: $selectedStyle
                         )
                         
-                        // Griglia dell'armadio filtrata
+                        // Filtered Closet Selection Grid
                         ClosetSelectionGrid(items: filteredInventory) { item in
                             withAnimation { selectedItems.append(item) }
                         }
