@@ -47,7 +47,7 @@ struct OutfitBuilderFilters: View {
     @Binding var selectedPosition: Position
     @Binding var selectedType: ClothingType?
     @Binding var selectedSeason: Season?
-    @Binding var selectedStyle: Style? // Aggiornato per usare il nuovo enum Style?
+    @Binding var selectedStyle: Style?
     
     var body: some View {
         VStack(spacing: 15) {
@@ -129,7 +129,13 @@ struct ClosetSelectionGrid: View {
     
     var body: some View {
         if items.isEmpty {
-            Text("No items found with these filters").foregroundStyle(.secondary).padding()
+            // ⭐️ OTTIMIZZAZIONE UX: Usa la View nativa Apple per gli stati vuoti
+            ContentUnavailableView(
+                "Nessun capo trovato",
+                systemImage: "magnifyingglass",
+                description: Text("Prova a cambiare i filtri per vedere più risultati.")
+            )
+            .padding()
         } else {
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 15) {
                 ForEach(items) { item in

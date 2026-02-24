@@ -113,7 +113,7 @@ struct SearchView: View {
                                 } else {
                                     LazyVGrid(columns: columns, spacing: 20) {
                                         ForEach(searchResults) { cloth in
-                                            NavigationLink(destination: DetailView(cloth: cloth)) {
+                                            NavigationLink(destination: DetailedView(cloth: cloth)) {
                                                 ClothCard(cloth: cloth)
                                             }
                                             .buttonStyle(PlainButtonStyle())

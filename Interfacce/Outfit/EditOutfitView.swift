@@ -17,6 +17,40 @@ struct EditOutfitView: View {
     // Controlla se l'utente ha richiesto i suggerimenti
     @State private var isMatchingEnabled: Bool = false
     
+    // --- 1. NUOVE VARIABILI DI STATO PER I FILTRI ---
+    @State private var selectedPosition: Position = .top
+    @State private var selectedType: ClothingType? = nil
+    @State private var selectedSeason: Season? = nil
+    @State private var selectedStyle: Style? = nil
+    
+    // --- 2. LOGICA DI FILTRAGGIO (Identica a CreateOutfitView) ---
+    private var filteredInventory: [Cloth] {
+        
+        // ⚡️ OTTIMIZZAZIONE: Creiamo un Set di ID.
+        // La ricerca dentro un Set è istantanea, evitando che l'app "scatti" quando hai tanti vestiti!
+        let selectedItemIDs = Set(selectedItems.map { $0.id })
+        
+        return closetManager.inventory.filter { item in
+            
+            // 1. Escludi se già selezionato (ora è velocissimo)
+            let isNotSelected = !selectedItemIDs.contains(item.id)
+                
+            // 2. Filtro Macro-Posizione (es. Tops)
+            let matchesPosition = item.type.possiblePositions.contains(selectedPosition)
+            
+            // 3. Filtro Micro-Tipo (es. T-shirts) - Solo se selezionato
+            let matchesType = selectedType == nil || item.type == selectedType
+            
+            // 4. Filtro Stagione (item.season è [Season])
+            let matchesSeason = selectedSeason == nil || item.season.contains(selectedSeason!)
+                
+            // 5. Filtro Stile (aggiornato con l'enum Style)
+            let matchesStyle = selectedStyle == nil || item.style.contains(selectedStyle!)
+                
+            return isNotSelected && matchesPosition && matchesType && matchesSeason && matchesStyle
+        }
+    }
+    
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -109,31 +143,24 @@ struct EditOutfitView: View {
                         }
                     }
                     
-                    // 4. TUTTO L'ARMADIO (Capi non ancora selezionati)
-                    VStack(alignment: .leading) {
-                        Text("Il tuo armadio")
-                            .font(.headline)
-                            .padding(.horizontal)
+                    Divider().padding(.horizontal)
+                    
+                    // 4. THE BUILDER (Filtri + Griglia Dinamica)
+                    VStack(alignment: .leading, spacing: 20) {
+                        Text("Aggiungi capi")
+                            .font(.title2).bold().padding(.horizontal)
                         
-                        let availableItems = closetManager.inventory.filter { item in
-                            !selectedItems.contains(where: { $0.id == item.id })
-                        }
+                        // Inseriamo il componente filtri
+                        OutfitBuilderFilters(
+                            selectedPosition: $selectedPosition,
+                            selectedType: $selectedType,
+                            selectedSeason: $selectedSeason,
+                            selectedStyle: $selectedStyle
+                        )
                         
-                        if availableItems.isEmpty {
-                            Text("Non hai altri capi disponibili.")
-                                .foregroundStyle(.secondary)
-                                .padding(.horizontal)
-                        } else {
-                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 15) {
-                                ForEach(availableItems) { item in
-                                    ItemThumbnail(cloth: item, actionIcon: "plus.circle.fill") {
-                                        withAnimation {
-                                            selectedItems.append(item)
-                                        }
-                                    }
-                                }
-                            }
-                            .padding(.horizontal)
+                        // Inseriamo la griglia con l'inventario filtrato
+                        ClosetSelectionGrid(items: filteredInventory) { item in
+                            withAnimation { selectedItems.append(item) }
                         }
                     }
                 }
@@ -146,7 +173,6 @@ struct EditOutfitView: View {
             .onAppear {
                 if let outfit = closetManager.outfits.first(where: { $0.id == outfitId }) {
                     outfitName = outfit.outfitName
-                    // Trasformiamo subito gli UUID salvati in oggetti 'Cloth' reali per usarli nell'interfaccia
                     selectedItems = closetManager.items(for: outfit)
                 }
             }
@@ -160,18 +186,11 @@ struct EditOutfitView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Salva") {
-                        // Se l'utente svuota il nome, mettiamo un default
                         let finalName = outfitName.trimmingCharacters(in: .whitespaces).isEmpty ? "Outfit Modificato" : outfitName
-                        
-                        // Ri-trasformiamo gli oggetti Cloth in UUID per il salvataggio
                         let itemsIds = selectedItems.map { $0.id }
-                        
-                        // Chiamiamo la funzione di update creata in precedenza
                         closetManager.updateOutfit(id: outfitId, newName: finalName, newItems: itemsIds)
-                        
                         dismiss()
                     }
-                    // Non si può salvare un outfit senza vestiti!
                     .disabled(selectedItems.isEmpty)
                 }
             }
