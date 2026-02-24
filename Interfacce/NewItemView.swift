@@ -1,7 +1,7 @@
 import SwiftUI
 import UIKit
 import Combine
-import PhotosUI
+import PhotosUI 
 
 struct NewItemView: View {
     var itemToEdit: Cloth? = nil
@@ -11,8 +11,6 @@ struct NewItemView: View {
     @State private var selectedPosition: Position = .top
     @State private var selectedType: ClothingType = .tShirt
     @State private var selectedSeason: Season = .summer
-    
-    // CORREZIONE 1: Uso l'enum Style al posto della String
     @State private var selectedStyle: Style = .casual
     
     @State private var selectedBrand: String = "Unbranded"
@@ -25,16 +23,16 @@ struct NewItemView: View {
     @State private var selectedColorUI: String = ""
     @State private var selectedImage: UIImage? = nil
     @State private var showCamera = false
+    
+    // 1. Qui c'è la variabile per il Picker della galleria
     @State private var pickerItem: PhotosPickerItem? = nil
     
-    // Stato per monitorare la tastiera
     @State private var isKeyboardVisible = false
     
     @Environment(ClosetManager.self) private var manager
     @Environment(\.dismiss) var dismiss
     
-    // CORREZIONE 2: Rimosso let styles = ["Casual", "Elegante", ...] manuale
-    
+    // ... [Colori e GridItem rimangono invariati] ...
     let uiColors: [String: Color] = [
         "WHITE": .white, "LIGHT GRAY": Color(white: 0.8), "GRAY": .gray, "DARK GRAY": Color(white: 0.2), "BLACK": .black,
         "RED": .red, "MAROON": Color(red: 0.5, green: 0, blue: 0), "ORANGE": .orange, "BEIGE": Color(red: 0.96, green: 0.96, blue: 0.86), "YELLOW": .yellow,
@@ -51,23 +49,55 @@ struct NewItemView: View {
                     TextField("Esempio: Camicia di lino", text: $name)
                 }
                 
+                // MARK: - SEZIONE FOTO AGGIORNATA
                 Section {
-                    Button(action: {
-                        hideKeyboard()
-                        showCamera = true
-                    }) {
+                    // Utilizziamo un Menu per dare le opzioni stile Apple
+                    Menu {
+                        // Opzione 1: Fotocamera
+                        Button(action: {
+                            hideKeyboard()
+                            showCamera = true
+                        }) {
+                            Label("Scatta Foto", systemImage: "camera")
+                        }
+                        
+                        // Opzione 2: Galleria (Usa pickerItem)
+                        PhotosPicker(selection: $pickerItem, matching: .images) {
+                            Label("Scegli dalla Libreria", systemImage: "photo.on.rectangle")
+                        }
+                        
+                        // Opzione 3: Rimuovi (Visibile solo se c'è una foto)
+                        if selectedImage != nil {
+                            Button(role: .destructive) {
+                                withAnimation {
+                                    selectedImage = nil
+                                    pickerItem = nil // Resetta anche il picker
+                                }
+                            } label: {
+                                Label("Rimuovi Foto", systemImage: "trash")
+                            }
+                        }
+                        
+                    } label: {
+                        // L'aspetto del bottone nel form
                         HStack {
                             Image(systemName: "camera.fill")
-                            Text(selectedImage == nil ? "Scatta Foto (Opzionale)" : "Cambia Foto")
+                            Text(selectedImage == nil ? "Aggiungi Foto" : "Cambia Foto")
+                            Spacer()
+                            // Icona chevron per indicare che è un menu (opzionale)
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.caption)
+                                .foregroundColor(.gray)
                         }
-                        .frame(maxWidth: .infinity)
                         .foregroundColor(.primary)
                     }
+                    // Presentazione Fotocamera
                     .fullScreenCover(isPresented: $showCamera) {
                         CameraPicker(image: $selectedImage)
                             .ignoresSafeArea()
                     }
                     
+                    // Anteprima Immagine
                     if let image = selectedImage {
                         Image(uiImage: image)
                             .resizable()
@@ -75,8 +105,11 @@ struct NewItemView: View {
                             .frame(height: 200)
                             .cornerRadius(10)
                             .clipped()
+                            .listRowInsets(EdgeInsets()) // Toglie i bordi standard della lista per l'immagine
                     }
                 }
+                
+                // ... [Il resto delle Section: CATEGORIA, STYLE, COLORE, BRAND, SEASON rimane invariato] ...
                 
                 Section(header: Text("CATEGORIA")) {
                     Picker("Posizione", selection: $selectedPosition) {
@@ -98,7 +131,6 @@ struct NewItemView: View {
                     }
                 }
                 
-                // CORREZIONE 3: Uso Style.allCases per iterare
                 Section(header: Text("STYLE")) {
                     Picker("Seleziona", selection: $selectedStyle) {
                         ForEach(Style.allCases) { style in
@@ -148,6 +180,7 @@ struct NewItemView: View {
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle(itemToEdit == nil ? "Aggiungi Capo" : "Modifica Capo")
             .navigationBarItems(leading: Button("Annulla") { dismiss() })
+            // ... [Alert e Gesture rimangono invariati] ...
             .alert("Nuovo Brand", isPresented: $showingAddBrandAlert) {
                 TextField("Nome brand", text: $newBrandName)
                 Button("Annulla", role: .cancel) {
@@ -169,39 +202,47 @@ struct NewItemView: View {
                 Text("Inserisci il nome del brand da aggiungere alla lista.")
             }
         }
-        // --- GESTURE AD ALTA SENSIBILITÀ (SOGLIA 30) ---
         .gesture(
             DragGesture()
                 .onEnded { value in
-                    // Se lo spostamento è superiore a 30 (molto sensibile)
                     if abs(value.translation.width) > 30 {
                         if isKeyboardVisible {
-                            // Step 1: Chiude la tastiera se aperta
                             hideKeyboard()
                         } else {
-                            // Step 2: Chiude la tendina se la tastiera è già chiusa
                             dismiss()
                         }
                     }
                 }
         )
-        // Listener per lo stato della tastiera
+        // Listener Tastiera
         .onReceive(Publishers.Merge(
             NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification).map { _ in true },
             NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification).map { _ in false }
         )) { isVisible in
             self.isKeyboardVisible = isVisible
         }
+        // MARK: - GESTIONE CARICAMENTO FOTO DALLA GALLERIA
+        // Questo osserva quando l'utente seleziona una foto dal picker
+        .onChange(of: pickerItem) { _, newItem in
+            Task {
+                // Carica i dati come oggetto trasferibile
+                if let data = try? await newItem?.loadTransferable(type: Data.self),
+                   let uiImage = UIImage(data: data) {
+                    // Aggiorna l'immagine sul thread principale
+                    await MainActor.run {
+                        self.selectedImage = uiImage
+                    }
+                }
+            }
+        }
         .onAppear {
+            // ... [Caricamento dati item esistente invariato] ...
             if let cloth = itemToEdit {
                 name = cloth.name
                 selectedPosition = cloth.position
                 selectedType = cloth.type
                 selectedSeason = cloth.season.first ?? .summer
-                
-                // CORREZIONE 4: Fallback su un valore dell'enum, non una stringa
                 selectedStyle = cloth.style.first ?? .casual
-                
                 selectedBrand = cloth.brand
                 previousBrand = cloth.brand
                 if let firstColor = cloth.coloreIndumentoRicerca.first {
@@ -211,7 +252,9 @@ struct NewItemView: View {
             }
         }
     }
-
+    
+    // ... [Funzioni hideKeyboard, colorSection, isColorDark, saveCloth rimangono invariate] ...
+    
     private func hideKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
@@ -247,6 +290,7 @@ struct NewItemView: View {
     }
 
     func saveCloth() {
+        // Logica salvataggio identica a prima
         let finalImageData: Data
         if let uiImage = selectedImage, let data = uiImage.jpegData(compressionQuality: 0.7) {
             finalImageData = data
@@ -281,7 +325,6 @@ struct NewItemView: View {
             default: finalColor = .black
         }
 
-        // CORREZIONE 5: Aggiorna se esiste, crea se non esiste, usando l'enum
         if let cloth = itemToEdit {
             manager.updateItem(
                 id: cloth.id,
@@ -311,6 +354,7 @@ struct NewItemView: View {
     }
 }
 
+// CameraPicker rimane invariato
 struct CameraPicker: UIViewControllerRepresentable {
     @Binding var image: UIImage?
     @Environment(\.dismiss) var dismiss
