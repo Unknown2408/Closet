@@ -110,12 +110,16 @@ struct DetailedView: View {
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button(action: {
+                    let generator = UIImpactFeedbackGenerator(style: .medium)
+                    generator.impactOccurred()
+                    
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
                         manager.toggleFavorite(ofItemWithID: currentCloth.id)
                     }
                 }) {
                     Image(systemName: currentCloth.favourite ? "heart.fill" : "heart")
-                        .foregroundColor(currentCloth.favourite ? .red : .black)
+                        // 🔥 Adesso il cuore è sempre nero
+                        .foregroundColor(.black)
                 }
                 
                 Menu {
