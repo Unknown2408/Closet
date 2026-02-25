@@ -199,52 +199,48 @@ import SwiftUI
         return inventory.filter { outfit.items.contains($0.id) }
     }
     
-    // COLOR MATCHING
-    func getCascadingSuggestions(for selectedItems: [Cloth]) -> [Cloth] {
-        guard !selectedItems.isEmpty else { return [] }
-                
-        let occupiedPositions = selectedItems.map { $0.position }
-        var commonValidColors: Set<String> = []
-                
-        if let firstItem = selectedItems.first,
-           let firstColor = firstItem.coloreIndumentoRicerca.first {
-            let compatibleWithFirst = colorRules[firstColor.rawValue] ?? []
-            commonValidColors = Set(compatibleWithFirst)
-        }
-                
-        for item in selectedItems.dropFirst() {
-            if let color = item.coloreIndumentoRicerca.first {
-                let colorString: String = color.rawValue
-                let arrayColoriCompatibili: [String] = colorRules[colorString] ?? []
-                let compatibleWithItem: Set<String> = Set(arrayColoriCompatibili)
-                commonValidColors.formIntersection(compatibleWithItem)
-            }
-        }
-                
-        let suggestions = inventory.filter { item in
+    // COLOR MATCHING (LIBERO DA VINCOLI DI QUANTITÀ)
+        func getCascadingSuggestions(for selectedItems: [Cloth]) -> [Cloth] {
+            guard !selectedItems.isEmpty else { return [] }
                     
-            // ⭐️ NUOVA REGOLA DEL LAYERING:
-            let isPositionFree: Bool
-                        
-            if item.position == .outerwear {
-                // Massimo 2 Outerwear sovrapposti (es. Hoodie + Jacket)
-                let outerwearCount = occupiedPositions.filter { $0 == .outerwear }.count
-                isPositionFree = outerwearCount < 2
-            } else if item.position == .accessories {
-                // Nessun limite per gli accessori!
-                isPositionFree = true
-            } else {
-                // Per tops, pantaloni e scarpe: limite ferreo di 1 solo capo
-                isPositionFree = !occupiedPositions.contains(item.position)
+            // Gli occupiedPositions non ci servono più per limitare!
+            var commonValidColors: Set<String> = []
+                    
+            // 1. Inizializziamo i colori validi basandoci sul primo capo scelto
+            if let firstItem = selectedItems.first,
+               let firstColor = firstItem.coloreIndumentoRicerca.first {
+                let compatibleWithFirst = colorRules[firstColor.rawValue] ?? []
+                commonValidColors = Set(compatibleWithFirst)
             }
-                        
-            let hasValidColor = item.coloreIndumentoRicerca.contains { color in
-                commonValidColors.contains(color.rawValue)
+                    
+            // 2. Intersechiamo i colori compatibili con gli altri capi già scelti
+            for item in selectedItems.dropFirst() {
+                if let color = item.coloreIndumentoRicerca.first {
+                    let colorString: String = color.rawValue
+                    let arrayColoriCompatibili: [String] = colorRules[colorString] ?? []
+                    let compatibleWithItem: Set<String> = Set(arrayColoriCompatibili)
+                    commonValidColors.formIntersection(compatibleWithItem)
+                }
             }
-                        
-            return isPositionFree && hasValidColor
-        }
+                    
+            // 3. Filtriamo l'inventario per i suggerimenti
+            let suggestions = inventory.filter { item in
                 
-        return suggestions
-    }
+                // 🔥 Rimosso il blocco del "Layering" e i limiti di quantità.
+                // L'app ora suggerisce tutto ciò che sta bene cromaticamente,
+                // lasciando all'utente la libertà di scegliere quanti capi aggiungere per ogni slot.
+                
+                let hasValidColor = item.coloreIndumentoRicerca.contains { color in
+                    commonValidColors.contains(color.rawValue)
+                }
+                
+                // Suggeriamo il capo solo se il colore "matcha"
+                // E ci assicuriamo di non suggerire un capo che è già stato selezionato
+                let isNotAlreadySelected = !selectedItems.contains(where: { $0.id == item.id })
+                
+                return hasValidColor && isNotAlreadySelected
+            }
+                    
+            return suggestions
+        }
 }

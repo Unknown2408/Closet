@@ -12,68 +12,100 @@ struct OutfitNameSection: View {
     }
 }
 
-// Componente 2: Capi già scelti
-struct SelectedItemsHeader: View {
-    @Binding var selectedItems: [Cloth]
-    @Binding var isMatchingEnabled: Bool
-    
+// 🔥 ECCO IL COMPONENTE MANCANTE: OutfitSlotRow
+struct OutfitSlotRow: View {
+    let position: Position
+    let items: [Cloth]
+    let onAdd: () -> Void
+    let onRemove: (Cloth) -> Void
+
     var body: some View {
-        if !selectedItems.isEmpty {
-            VStack(alignment: .leading, spacing: 15) {
+        VStack(alignment: .leading, spacing: 10) {
+            
+            HStack {
+                Text(position.rawValue)
+                    .font(.headline)
+                Spacer()
+                Button(action: onAdd) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "plus")
+                        Text("Add")
+                    }
+                    .font(.subheadline).bold()
+                }
+            }
+            
+            if items.isEmpty {
+                Button(action: onAdd) {
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(style: StrokeStyle(lineWidth: 2, dash: [5]))
+                        .foregroundColor(.gray.opacity(0.5))
+                        .frame(height: 80)
+                        .overlay(
+                            Image(systemName: "plus")
+                                .font(.title)
+                                .foregroundColor(.gray)
+                        )
+                }
+                .buttonStyle(.plain)
+            } else {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
-                        ForEach(selectedItems) { item in
+                        ForEach(items) { item in
                             ItemThumbnail(cloth: item, actionIcon: "minus.circle.fill") {
-                                withAnimation { selectedItems.removeAll { $0.id == item.id } }
+                                onRemove(item)
                             }
                         }
-                    }.padding(.horizontal)
+                        
+                        Button(action: onAdd) {
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(style: StrokeStyle(lineWidth: 2, dash: [5]))
+                                .foregroundColor(.gray.opacity(0.5))
+                                .frame(width: 80, height: 80)
+                                .overlay(
+                                    Image(systemName: "plus")
+                                        .foregroundColor(.gray)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
-                
-                Button(action: { withAnimation { isMatchingEnabled.toggle() }}) {
-                    Label(isMatchingEnabled ? "Hide Match" : "Magic Match", systemImage: "sparkles")
-                        .frame(maxWidth: .infinity).font(.headline)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(isMatchingEnabled ? .secondary : .black)
-                .padding(.horizontal)
             }
         }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
     }
 }
 
 // Componente 3: I Filtri (Pills + Dropdowns)
 struct OutfitBuilderFilters: View {
-    @Binding var selectedPosition: Position
+    let currentPosition: Position
+    
     @Binding var selectedType: ClothingType?
     @Binding var selectedSeason: Season?
     @Binding var selectedStyle: Style?
+    @Binding var showFavoritesOnly: Bool
     
     var body: some View {
-        VStack(spacing: 15) {
-            // Pills per la Posizione (Macro)
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    ForEach(Position.allCases) { pos in
-                        Button(pos.rawValue) {
-                            withAnimation {
-                                selectedPosition = pos
-                                selectedType = nil // Reset tipo quando cambi posizione
-                            }
-                        }
-                        .padding(.horizontal, 16).padding(.vertical, 8)
-                        .background(selectedPosition == pos ? Color.black : Color.gray.opacity(0.1))
-                        .foregroundColor(selectedPosition == pos ? .white : .primary)
-                        .clipShape(Capsule())
-                    }
-                }.padding(.horizontal)
-            }
-            
-            // Menù a tendina (Micro)
+        ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 10) {
-                // Filtro Tipo (dinamico)
+                
+                Button(action: {
+                    withAnimation { showFavoritesOnly.toggle() }
+                }) {
+                    HStack {
+                        Image(systemName: showFavoritesOnly ? "heart.fill" : "heart")
+                        Text("Favs")
+                    }
+                    .font(.caption).bold()
+                    .padding(10)
+                    .background(showFavoritesOnly ? Color.red.opacity(0.1) : Color.gray.opacity(0.1))
+                    .foregroundColor(showFavoritesOnly ? .red : .primary)
+                    .cornerRadius(8)
+                }
+                
                 Menu {
-                    ForEach(ClothingType.allCases.filter { $0.possiblePositions.contains(selectedPosition) }) { type in
+                    ForEach(ClothingType.allCases.filter { $0.possiblePositions.contains(currentPosition) }) { type in
                         Button(type.rawValue) { selectedType = type }
                     }
                     Button("All Types") { selectedType = nil }
@@ -81,7 +113,6 @@ struct OutfitBuilderFilters: View {
                     FilterLabel(title: selectedType?.rawValue ?? "Type", icon: "line.3.horizontal.decrease")
                 }
                 
-                // Filtro Stagione
                 Menu {
                     ForEach(Season.allCases, id: \.self) { s in
                         Button(s.rawValue) { selectedSeason = s }
@@ -90,7 +121,6 @@ struct OutfitBuilderFilters: View {
                     FilterLabel(title: selectedSeason?.rawValue ?? "Season", icon: "leaf")
                 }
                 
-                // Filtro Stile (aggiornato con enum)
                 Menu {
                     ForEach(Style.allCases) { s in
                         Button(s.rawValue) { selectedStyle = s }
@@ -117,6 +147,7 @@ struct FilterLabel: View {
         .font(.caption).bold()
         .padding(10)
         .background(Color.gray.opacity(0.1))
+        .foregroundColor(.primary)
         .cornerRadius(8)
     }
 }
@@ -128,7 +159,6 @@ struct ClosetSelectionGrid: View {
     
     var body: some View {
         if items.isEmpty {
-            // ⭐️ OTTIMIZZAZIONE UX: Usa la View nativa Apple per gli stati vuoti
             ContentUnavailableView(
                 "Nessun capo trovato",
                 systemImage: "magnifyingglass",
@@ -152,7 +182,7 @@ struct MagicMatchList: View {
     var body: some View {
         if !items.isEmpty {
             VStack(alignment: .leading) {
-                Text("Suggested for you").font(.headline).padding(.horizontal)
+                Text("Suggested for you ✨").font(.headline).padding(.horizontal)
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 15) {
                         ForEach(items) { item in
