@@ -15,7 +15,6 @@ struct DetailedView: View {
     
     @State private var showingEditSheet = false
     @State private var showingMatchesSheet = false
-    
     @State private var showingDeleteConfirm = false
     
     var currentCloth: Cloth {
@@ -27,7 +26,7 @@ struct DetailedView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     
-                    // 1. NOME E BRAND SOPRA L'IMMAGINE
+                    // 1. NOME E BRAND
                     VStack(alignment: .leading, spacing: 5) {
                         Text(currentCloth.name)
                             .font(.title.bold())
@@ -63,24 +62,20 @@ struct DetailedView: View {
 
                     Divider().padding(.horizontal)
 
-                    // 3. TUTTI I DETTAGLI (Style, Season, Colors)
+                    // 3. DETTAGLI (Style, Season, Colors)
                     VStack(alignment: .leading, spacing: 15) {
-                        
-                        // Style
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Style").font(.headline)
                             Text(currentCloth.style.map { $0.rawValue }.joined(separator: ", "))
                                 .foregroundColor(.secondary)
                         }
                         
-                        // Season
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Season").font(.headline)
                             Text(currentCloth.season.map { $0.rawValue }.joined(separator: ", "))
                                 .foregroundColor(.secondary)
                         }
                         
-                        // Colors
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Colors").font(.headline)
                             ForEach(currentCloth.coloreIndumentoRicerca, id: \.self) { coloreEnum in
@@ -98,7 +93,7 @@ struct DetailedView: View {
                 }
             }
 
-            // Pulsante Match (rimane fisso in basso)
+            // Pulsante Match
             Button(action: { showingMatchesSheet = true }) {
                 Text("Match")
                     .font(.headline)
@@ -112,11 +107,8 @@ struct DetailedView: View {
             .padding(.bottom, 10)
         }
         .navigationBarTitleDisplayMode(.inline)
-        // 4. PULSANTI NELLA BARRA DI NAVIGAZIONE IN ALTO
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
-                
-                // Pulsante Cuore
                 Button(action: {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
                         manager.toggleFavorite(ofItemWithID: currentCloth.id)
@@ -126,15 +118,11 @@ struct DetailedView: View {
                         .foregroundColor(currentCloth.favourite ? .red : .black)
                 }
                 
-                // Pulsante Ellipsis (...)
                 Menu {
                     Button(action: { showingEditSheet = true }) {
                         Label("Edit", systemImage: "pencil")
                     }
-                    
-                    Button(role: .destructive, action: {
-                        showingDeleteConfirm = true
-                    }) {
+                    Button(role: .destructive, action: { showingDeleteConfirm = true }) {
                         Label("Delete", systemImage: "trash")
                     }
                 } label: {
@@ -145,7 +133,6 @@ struct DetailedView: View {
         }
         .sheet(isPresented: $showingEditSheet) { NewItemView(itemToEdit: currentCloth) }
         .sheet(isPresented: $showingMatchesSheet) { MatchCreationSheet(anchorCloth: currentCloth) }
-        
         .alert("Delete Item", isPresented: $showingDeleteConfirm) {
             Button("Cancel", role: .cancel) { }
             Button("Delete", role: .destructive) {
@@ -158,130 +145,78 @@ struct DetailedView: View {
     }
 }
 
-// MARK: - Modale Abbinamenti (Totalmente rifatta e interattiva)
+// MARK: - Modale Abbinamenti (SISTEMA A SLOT)
 struct MatchCreationSheet: View {
     let anchorCloth: Cloth
     @Environment(ClosetManager.self) private var closetManager
     @Environment(\.dismiss) var dismiss
     
-    // Stato locale per creare un outfit al volo
-    @State private var selectedItems: [Cloth] = []
     @State private var outfitName: String = ""
-    @State private var showingSaveAlert = false
-    
-    // Suggerimenti basati sugli item attualmente selezionati
-    var suggestions: [Cloth] {
-        let rawSuggestions = closetManager.getCascadingSuggestions(for: selectedItems)
-        // Evitiamo di mostrare tra i suggerimenti capi che abbiamo già aggiunto
-        return rawSuggestions.filter { sugg in
-            !selectedItems.contains(where: { $0.id == sugg.id })
-        }
-    }
+    @State private var selectedItems: [Cloth] = []
+    @State private var activeSlotPosition: Position? = nil
     
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 20) {
-                
-                // 1. SELECTED ITEMS (I capi che stiamo assemblando)
-                VStack(alignment: .leading) {
-                    Text("Your look so far")
-                        .font(.headline)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 25) {
+                    
+                    OutfitNameSection(outfitName: $outfitName)
+                        .padding(.top)
+                    
+                    Divider().padding(.horizontal)
+                    
+                    Text("Complete the look")
+                        .font(.title2).bold()
                         .padding(.horizontal)
                     
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 15) {
-                            ForEach(selectedItems) { item in
-                                ZStack(alignment: .topTrailing) {
-                                    // La ClothCard ridotta per la lista orizzontale
-                                    ClothCard(cloth: item)
-                                        .frame(width: 120)
-                                    
-                                    // Pulsante per rimuovere (non mostrato per il capo principale)
-                                    if item.id != anchorCloth.id {
-                                        Button(action: {
-                                            withAnimation { selectedItems.removeAll(where: { $0.id == item.id }) }
-                                        }) {
-                                            Image(systemName: "minus.circle.fill")
-                                                .foregroundColor(.red)
-                                                .background(Circle().fill(Color.white))
+                    VStack(spacing: 5) {
+                        ForEach(Position.allCases) { position in
+                            VStack(spacing: 15) {
+                                let itemsForSlot = selectedItems.filter { $0.position == position }
+                                
+                                OutfitSlotRow(
+                                    position: position,
+                                    items: itemsForSlot,
+                                    onAdd: { activeSlotPosition = position },
+                                    onRemove: { itemToRemove in
+                                        withAnimation {
+                                            selectedItems.removeAll { $0.id == itemToRemove.id }
                                         }
-                                        .padding(4)
                                     }
+                                )
+                                
+                                if position != Position.allCases.last {
+                                    Divider().padding(.horizontal)
                                 }
                             }
                         }
-                        .padding(.horizontal)
                     }
                 }
-                .padding(.top)
-                
-                Divider()
-                
-                // 2. SUGGESTIONS (I Magic Matches)
-                VStack(alignment: .leading) {
-                    Text("Magic Matches")
-                        .font(.headline)
-                        .padding(.horizontal)
-                    
-                    if suggestions.isEmpty {
-                        Text("No more matches found.")
-                            .foregroundColor(.gray)
-                            .padding()
-                    } else {
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 15) {
-                                ForEach(suggestions) { item in
-                                    ZStack(alignment: .topTrailing) {
-                                        ClothCard(cloth: item)
-                                            .frame(width: 120)
-                                        
-                                        // Pulsante per aggiungere
-                                        Button(action: {
-                                            withAnimation { selectedItems.append(item) }
-                                        }) {
-                                            Image(systemName: "plus.circle.fill")
-                                                .foregroundColor(.black)
-                                                .background(Circle().fill(Color.white))
-                                        }
-                                        .padding(4)
-                                    }
-                                }
-                            }
-                            .padding(.horizontal)
-                        }
-                    }
-                }
-                
-                Spacer()
+                .padding(.vertical)
             }
             .navigationTitle("Build Outfit")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
+                        .foregroundStyle(.red)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        showingSaveAlert = true
+                    Button("Done") {
+                        let name = outfitName.isEmpty ? "Match Outfit" : outfitName
+                        closetManager.addOutfit(name: name, items: selectedItems.map { $0.id })
+                        dismiss()
                     }
-                    // Non ha senso salvare un outfit con 1 solo capo
                     .disabled(selectedItems.count < 2)
                 }
             }
-            // Alert per dare il nome all'outfit prima di salvare
-            .alert("Save Outfit", isPresented: $showingSaveAlert) {
-                TextField("Outfit Name", text: $outfitName)
-                Button("Cancel", role: .cancel) { }
-                Button("Save") {
-                    let name = outfitName.isEmpty ? "New Match Outfit" : outfitName
-                    closetManager.addOutfit(name: name, items: selectedItems.map { $0.id })
-                    dismiss()
-                }
-            } message: {
-                Text("Give a name to your new creation.")
+            .sheet(item: $activeSlotPosition) { position in
+                SlotSelectionView(
+                    position: position,
+                    outfitItems: $selectedItems
+                )
             }
             .onAppear {
-                // Inizializza l'outfit con il capo da cui siamo partiti!
                 selectedItems = [anchorCloth]
             }
         }

@@ -6,16 +6,20 @@ struct OutfitCardView: View {
     let outfit: Outfit
     
     var body: some View {
-        // TRUCCO INFALLIBILE:
-        // Cerchiamo l'outfit aggiornato in tempo reale direttamente dal manager qui dentro il body.
-        // In questo modo SwiftUI "ascolta" ogni minimo cambiamento dell'array outfits!
+        // Cerchiamo l'outfit aggiornato in tempo reale direttamente dal manager
         let currentOutfit = closetManager.outfits.first(where: { $0.id == outfit.id }) ?? outfit
         let isFavorite = currentOutfit.favourite
         
         VStack(alignment: .leading, spacing: 10) {
             
-            // --- 1. ANTEPRIMA VISIVA DEI VESTITI ---
-            let clothes = closetManager.items(for: currentOutfit)
+            // --- 1. ANTEPRIMA VISIVA DEI VESTITI (ORDINATA) ---
+            // Recuperiamo i capi e li ordiniamo in base alla posizione definita nell'enum Position
+            let clothes = closetManager.items(for: currentOutfit).sorted { item1, item2 in
+                let allPositions = Position.allCases
+                let index1 = allPositions.firstIndex(of: item1.position) ?? 0
+                let index2 = allPositions.firstIndex(of: item2.position) ?? 0
+                return index1 < index2
+            }
             
             if clothes.isEmpty {
                 RoundedRectangle(cornerRadius: 8)
@@ -25,7 +29,7 @@ struct OutfitCardView: View {
             } else {
                 HStack(spacing: -15) {
                     ForEach(clothes.prefix(3)) { cloth in
-                        // 🔥 MODIFICA QUI: Usiamo il componente asincrono al posto di UIImage(data:)
+                        // Usiamo il componente asincrono per il caricamento fluido
                         OptimizedClothImage(imageData: cloth.image, targetSize: CGSize(width: 150, height: 150))
                             .frame(width: 50, height: 50)
                             .clipShape(Circle())
@@ -67,7 +71,6 @@ struct OutfitCardView: View {
                     generator.impactOccurred()
                     
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                        // USA IL NUOVO NOME DELLA FUNZIONE per gli Outfit!
                         closetManager.toggleFavorite(ofOutfitWithID: currentOutfit.id)
                     }
                 }) {
@@ -77,7 +80,7 @@ struct OutfitCardView: View {
                         .padding(.trailing, 5)
                         .padding(.bottom, 5)
                 }
-                .buttonStyle(.plain) // Evita conflitti di tap all'interno della lista/griglia
+                .buttonStyle(.plain)
             }
         }
         .padding()

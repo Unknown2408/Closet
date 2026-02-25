@@ -7,14 +7,18 @@ struct OutfitDetailView: View {
     
     let outfitId: UUID
     @State private var showingDeleteAlert = false
-    
-    // 1. NUOVA VARIABILE: Controlla se il foglio di modifica è aperto
     @State private var isShowingEditSheet = false
     
     var body: some View {
         if let outfit = closetManager.outfits.first(where: { $0.id == outfitId }) {
             
-            let clothes = closetManager.items(for: outfit)
+            // --- ORDINA I VESTITI PER POSIZIONE ---
+            let clothes = closetManager.items(for: outfit).sorted { item1, item2 in
+                let allPositions = Position.allCases
+                let index1 = allPositions.firstIndex(of: item1.position) ?? 0
+                let index2 = allPositions.firstIndex(of: item2.position) ?? 0
+                return index1 < index2
+            }
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
@@ -32,7 +36,7 @@ struct OutfitDetailView: View {
                     .padding(.horizontal)
                     .padding(.top)
                     
-                    // 2. GRIGLIA DEI VESTITI
+                    // 2. GRIGLIA DEI VESTITI (ORDINATA)
                     Text("Items in this outfit (\(clothes.count))")
                         .font(.headline)
                         .padding(.horizontal)
@@ -40,7 +44,7 @@ struct OutfitDetailView: View {
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
                         ForEach(clothes) { cloth in
                             VStack {
-                                // 🔥 MODIFICA QUI: Usiamo OptimizedClothImage
+                                // Usiamo OptimizedClothImage per la griglia di dettaglio
                                 OptimizedClothImage(imageData: cloth.image, targetSize: CGSize(width: 300, height: 300))
                                     .frame(height: 160)
                                     .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -59,11 +63,10 @@ struct OutfitDetailView: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             
-            // 3. MENU IN ALTO A DESTRA (Aggiunto Cuore + Elimina/Modifica)
+            // 3. MENU IN ALTO A DESTRA
             .toolbar {
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     
-                    // Pulsante Cuore
                     Button(action: {
                         let generator = UIImpactFeedbackGenerator(style: .medium)
                         generator.impactOccurred()
@@ -72,15 +75,12 @@ struct OutfitDetailView: View {
                             closetManager.toggleFavorite(ofOutfitWithID: outfitId)
                         }
                     }) {
-                        // Leggiamo il dato in tempo reale direttamente dal manager
                         let isFav = closetManager.outfits.first(where: { $0.id == outfitId })?.favourite ?? false
-                        
                         Image(systemName: isFav ? "heart.fill" : "heart")
                             .foregroundColor(.black)
                     }
                     
                     Menu {
-                        // 2. AZIONE MODIFICATA: Ora apre la modale di modifica!
                         Button {
                             isShowingEditSheet = true
                         } label: {
@@ -100,15 +100,13 @@ struct OutfitDetailView: View {
             .alert("Delete Outfit", isPresented: $showingDeleteAlert) {
                 Button("Cancel", role: .cancel) { }
                 Button("Delete", role: .destructive) {
-                    closetManager.deleteOutfit(id: outfitId) // Usiamo direttamente l'ID
+                    closetManager.deleteOutfit(id: outfitId)
                     dismiss()
                 }
             } message: {
                 Text("Are you sure you want to delete this outfit? The clothes will still remain in your closet.")
             }
-            // 3. IL FOGLIO CHE CARICA LA SCHERMATA DI MODIFICA
             .sheet(isPresented: $isShowingEditSheet) {
-                // Passiamo l'ID alla view che abbiamo creato prima
                 EditOutfitView(outfitId: outfitId)
             }
             

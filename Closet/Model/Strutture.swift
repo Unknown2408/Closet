@@ -11,14 +11,14 @@ enum Season: String, CaseIterable, Codable {
     case allSeasons = "All Seasons"
 }
 
-// 2. POSITION (Macro-Categorie)
+// 2. POSITION (Macro-Categorie) - ORDINE AGGIORNATO
 enum Position: String, CaseIterable, Codable, Identifiable {
     case top = "Tops"
+    case outerwear = "Outerwear"   // 🔥 Spostato al secondo posto
     case bottom = "Bottoms"
     case footwear = "Footwear"
-    case outerwear = "Outerwear"
     case accessories = "Accessories"
-    case fullbody = "Fullbody"
+    case fullbody = "Fullbody"     // Rimasto in fondo o dove preferisci
     
     var id: String { self.rawValue }
 }
