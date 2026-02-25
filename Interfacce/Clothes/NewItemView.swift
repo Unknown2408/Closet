@@ -72,7 +72,7 @@ struct NewItemView: View {
                 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: { saveCloth() }) {
-                        Text(itemToEdit == nil ? "Done" : "Done")
+                        Text("Done")
                             .fontWeight(.bold)
                     }
                     // Controllo di validazione: nome, colore e almeno 1 stagione se non è "All Seasons"
