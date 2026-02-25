@@ -164,7 +164,7 @@ struct CategoryDetailView: View {
                         Image(systemName: "magnifyingglass")
                             .font(.largeTitle)
                             .foregroundColor(.gray)
-                        Text("No item found")
+                        Text("No items found")
                             .font(.headline)
                             .foregroundColor(.gray)
                         Text("Try to modify the filters or add new items")

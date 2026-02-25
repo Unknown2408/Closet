@@ -101,7 +101,7 @@ struct DetailedView: View {
 
             // Pulsante Match (rimane fisso in basso)
             Button(action: { showingMatchesSheet = true }) {
-                Text("Match ✨")
+                Text("Match")
                     .font(.headline)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
@@ -130,7 +130,7 @@ struct DetailedView: View {
                 // Pulsante Ellipsis (...)
                 Menu {
                     Button(action: { showingEditSheet = true }) {
-                        Label("Modify", systemImage: "pencil")
+                        Label("Edit", systemImage: "pencil")
                     }
                     
                     // ⭐️ MODIFICA: Ora cambia lo stato per far apparire l'alert
@@ -170,12 +170,12 @@ struct MatchCreationSheet: View {
     var body: some View {
         NavigationStack {
             VStack {
-                Text("Cerca abbinamenti per \(anchorCloth.name)...")
+                Text("Looking matches for \(anchorCloth.name)...")
                     .foregroundColor(.gray)
             }
-            .navigationTitle("Match ✨")
+            .navigationTitle("Match")
             .toolbar {
-                Button("Fatto") { dismiss() }
+                Button("Done") { dismiss() }
             }
         }
     }

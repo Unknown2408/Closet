@@ -22,7 +22,7 @@ struct NewItemView: View {
     @State private var previousBrand: String = "Unbranded"
     @State private var showingAddBrandAlert = false
     @State private var newBrandName = ""
-    let addNewBrandOption = "+ Aggiungi ..."
+    let addNewBrandOption = "+ Add ..."
     
     // PHOTO
     @State private var selectedColorUI: String = ""
@@ -59,20 +59,20 @@ struct NewItemView: View {
                 styleSection
                 colorSection
                 brandSection
-                seasonSection // ⭐️ Sezione stagioni aggiornata
+                seasonSection // Sezione stagioni aggiornata
             }
             .scrollDismissesKeyboard(.interactively)
-            .navigationTitle(itemToEdit == nil ? "Aggiungi Capo" : "Modifica Capo")
+            .navigationTitle(itemToEdit == nil ? "Add an Item" : "Modify Item")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Annulla") { dismiss() }
+                    Button("Cancel") { dismiss() }
                     .foregroundColor(.red)
                 }
                 
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: { saveCloth() }) {
-                        Text(itemToEdit == nil ? "Salva" : "Aggiorna")
+                        Text(itemToEdit == nil ? "Done" : "Done")
                             .fontWeight(.bold)
                     }
                     // Controllo di validazione: nome, colore e almeno 1 stagione se non è "All Seasons"
@@ -127,25 +127,25 @@ struct NewItemView: View {
     // MARK: - SOTTO-VISTE ESTRATTE
     
     private var nameSection: some View {
-        Section(header: Text("NOME")) {
-            TextField("Esempio: Camicia di lino", text: $name)
+        Section(header: Text("NAME")) {
+            TextField("Example: linen shirt", text: $name)
         }
     }
     
     private var photoSection: some View {
         Section {
             Menu {
-                Button(action: { hideKeyboard(); showCamera = true }) { Label("Scatta Foto", systemImage: "camera") }
-                Button(action: { showPhotoLibrary = true }) { Label("Scegli dalla Libreria", systemImage: "photo.on.rectangle") }
+                Button(action: { hideKeyboard(); showCamera = true }) { Label("Take a picture", systemImage: "camera") }
+                Button(action: { showPhotoLibrary = true }) { Label("Choose from the gallery", systemImage: "photo.on.rectangle") }
                 if selectedImage != nil {
                     Button(role: .destructive) {
                         withAnimation { selectedImage = nil; pickerItem = nil }
-                    } label: { Label("Rimuovi Foto", systemImage: "trash") }
+                    } label: { Label("Delete picture", systemImage: "trash") }
                 }
             } label: {
                 HStack {
                     Image(systemName: "camera.fill")
-                    Text(selectedImage == nil ? "Aggiungi Foto" : "Cambia Foto")
+                    Text(selectedImage == nil ? "Add a picture" : "Change picture")
                     Spacer()
                     Image(systemName: "chevron.up.chevron.down").font(.caption).foregroundColor(.gray)
                 }
@@ -175,7 +175,7 @@ struct NewItemView: View {
                         Color.white.opacity(0.7)
                         VStack(spacing: 10) {
                             ProgressView()
-                            Text("Rimuovo lo sfondo...").font(.caption).bold()
+                            Text("Removing background...").font(.caption).bold()
                         }
                     }
                 }
@@ -184,8 +184,8 @@ struct NewItemView: View {
     }
     
     private var categorySection: some View {
-        Section(header: Text("CATEGORIA")) {
-            Picker("Posizione", selection: $selectedPosition) {
+        Section(header: Text("CATEGORY")) {
+            Picker("Position", selection: $selectedPosition) {
                 ForEach(Position.allCases) { position in Text(position.rawValue).tag(position) }
             }
             .onChange(of: selectedPosition) { _, newPosition in
@@ -194,7 +194,7 @@ struct NewItemView: View {
                 }
             }
             
-            Picker("Tipo", selection: $selectedType) {
+            Picker("Type", selection: $selectedType) {
                 let tipiFiltrati = ClothingType.allCases.filter { $0.possiblePositions.contains(selectedPosition) }
                 ForEach(tipiFiltrati) { type in Text(type.rawValue).tag(type) }
             }
@@ -203,14 +203,14 @@ struct NewItemView: View {
     
     private var styleSection: some View {
         Section(header: Text("STYLE")) {
-            Picker("Seleziona", selection: $selectedStyle) {
+            Picker("Select a style", selection: $selectedStyle) {
                 ForEach(Style.allCases) { style in Text(style.rawValue).tag(style) }
             }
         }
     }
     
     private var colorSection: some View {
-        Section(header: Text("COLORE: \(selectedColorUI)")) {
+        Section(header: Text("COLOR: \(selectedColorUI)")) {
             LazyVGrid(columns: columns, spacing: 15) {
                 ForEach(Array(uiColors.keys).sorted(), id: \.self) { colorName in
                     ZStack {
@@ -231,7 +231,7 @@ struct NewItemView: View {
     
     private var brandSection: some View {
         Section(header: Text("BRAND")) {
-            Picker("Seleziona", selection: $selectedBrand) {
+            Picker("Select a brand", selection: $selectedBrand) {
                 ForEach(manager.brands, id: \.self) { Text($0).tag($0) }
                 Divider()
                 Text(addNewBrandOption).tag(addNewBrandOption)
@@ -301,7 +301,7 @@ struct NewItemView: View {
             }
             selectedImage = UIImage(data: cloth.image)
             
-            // ⭐️ CARICA LE STAGIONI ESISTENTI
+            // CARICA LE STAGIONI ESISTENTI
             if cloth.season.contains(.allSeasons) {
                 isAllSeasons = true
                 selectedSeasons.removeAll()
@@ -399,7 +399,7 @@ struct NewItemView: View {
             default: finalColor = .black
         }
 
-        // ⭐️ SALVATAGGIO STAGIONI
+        // SALVATAGGIO STAGIONI
         let finalSeasons: [Season] = isAllSeasons ? [.allSeasons] : Array(selectedSeasons)
 
         if let cloth = itemToEdit {
