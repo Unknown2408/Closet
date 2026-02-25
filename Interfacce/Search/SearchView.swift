@@ -39,14 +39,7 @@ struct SearchView: View {
                 
                 VStack(alignment: .leading, spacing: 0) {
                     
-                    // 1. TITOLO FISSO IN ALTO
-                    Text("My Closet")
-                        .font(.system(size: 40, weight: .bold))
-                        .foregroundColor(.black)
-                        .padding(.horizontal)
-                        .padding(.top, 16)
-                    
-                    // 2. BARRA DI RICERCA CUSTOM FISSA
+                    // 1. BARRA DI RICERCA CUSTOM FISSA
                     HStack {
                         Image(systemName: "magnifyingglass")
                             .foregroundColor(.gray)
@@ -69,7 +62,7 @@ struct SearchView: View {
                     .padding(.top, 16)
                     .padding(.bottom, 20)
                     
-                    // 3. SCROLLVIEW
+                    // 2. SCROLLVIEW
                     ScrollView {
                         VStack(alignment: .leading, spacing: 30) {
                             
