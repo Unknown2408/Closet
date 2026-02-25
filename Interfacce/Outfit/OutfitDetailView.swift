@@ -40,22 +40,11 @@ struct OutfitDetailView: View {
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
                         ForEach(clothes) { cloth in
                             VStack {
-                                if let uiImage = UIImage(data: cloth.image) {
-                                    Image(uiImage: uiImage)
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(height: 160)
-                                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                                        .shadow(color: .black.opacity(0.1), radius: 3)
-                                } else {
-                                    Image(systemName: "tshirt")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .padding()
-                                        .frame(height: 160)
-                                        .background(Color.gray.opacity(0.2))
-                                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                                }
+                                // 🔥 MODIFICA QUI: Usiamo OptimizedClothImage
+                                OptimizedClothImage(imageData: cloth.image, targetSize: CGSize(width: 300, height: 300))
+                                    .frame(height: 160)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .shadow(color: .black.opacity(0.1), radius: 3)
                                 
                                 Text(cloth.type.rawValue)
                                     .font(.caption)

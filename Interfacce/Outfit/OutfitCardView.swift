@@ -25,15 +25,12 @@ struct OutfitCardView: View {
             } else {
                 HStack(spacing: -15) {
                     ForEach(clothes.prefix(3)) { cloth in
-                        if let uiImage = UIImage(data: cloth.image) {
-                            Image(uiImage: uiImage)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 50, height: 50)
-                                .clipShape(Circle())
-                                .overlay(Circle().stroke(Color.white, lineWidth: 2))
-                                .shadow(color: .black.opacity(0.1), radius: 3, x: 0, y: 2)
-                        }
+                        // 🔥 MODIFICA QUI: Usiamo il componente asincrono al posto di UIImage(data:)
+                        OptimizedClothImage(imageData: cloth.image, targetSize: CGSize(width: 150, height: 150))
+                            .frame(width: 50, height: 50)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                            .shadow(color: .black.opacity(0.1), radius: 3, x: 0, y: 2)
                     }
                     
                     if clothes.count > 3 {

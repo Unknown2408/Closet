@@ -23,15 +23,15 @@ struct EditOutfitView: View {
     @State private var selectedSeason: Season? = nil
     @State private var selectedStyle: Style? = nil
     
-    // --- 2. FILTER LOGIC (Identical to CreateOutfitView) ---
-    private var filteredInventory: [Cloth] {
-        
+    // 🔥 1. NUOVO STATO: Variabile di stato al posto della computed property
+    @State private var filteredInventory: [Cloth] = []
+    
+    // 🔥 2. LA FUNZIONE CHE FILTRA
+    private func applyFilters() {
         // ⚡️ OPTIMIZATION: Create a Set of IDs.
-        // Searching inside a Set is instantaneous, preventing UI lag.
         let selectedItemIDs = Set(selectedItems.map { $0.id })
         
-        return closetManager.inventory.filter { item in
-            
+        filteredInventory = closetManager.inventory.filter { item in
             // 1. Exclude if already selected
             let isNotSelected = !selectedItemIDs.contains(item.id)
                 
@@ -175,17 +175,27 @@ struct EditOutfitView: View {
                     outfitName = outfit.outfitName
                     selectedItems = closetManager.items(for: outfit)
                 }
+                // 🔥 Applichiamo i filtri appena la vista appare e i dati sono caricati
+                applyFilters()
             }
+            // 🔥 3. AGGIORNIAMO I FILTRI SOLO QUANDO SERVE:
+            .onChange(of: selectedPosition) { _, _ in applyFilters() }
+            .onChange(of: selectedType) { _, _ in applyFilters() }
+            .onChange(of: selectedSeason) { _, _ in applyFilters() }
+            .onChange(of: selectedStyle) { _, _ in applyFilters() }
+            .onChange(of: selectedItems.count) { _, _ in applyFilters() }
             
-            // 6. TOOLBAR (Cancel / Save)
+            // 6. TOOLBAR (Cancel / Done)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         dismiss()
                     }
+                    .foregroundStyle(.red) // 🔴 Cancel in rosso
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
+                    // 🟢 Save diventa Done
+                    Button("Done") {
                         let finalName = outfitName.trimmingCharacters(in: .whitespaces).isEmpty ? "Edited Outfit" : outfitName
                         let itemsIds = selectedItems.map { $0.id }
                         closetManager.updateOutfit(id: outfitId, newName: finalName, newItems: itemsIds)

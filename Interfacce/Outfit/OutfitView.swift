@@ -181,22 +181,18 @@ struct OutfitsView: View {
         }
         .alert("Delete Outfit", isPresented: $showingDeleteConfirm) {
             Button("Cancel", role: .cancel) { }
+            
+            // 🔥 MODIFICA QUI: Un solo colpo, un solo salvataggio!
             Button("Delete", role: .destructive) {
                 withAnimation {
-                    for id in selectedOutfits {
-                        closetManager.deleteOutfit(id: id)
-                    }
+                    closetManager.deleteMultipleOutfits(withIds: selectedOutfits)
                     isEditing = false
                     selectedOutfits.removeAll()
                 }
             }
+            
         } message: {
             Text("Are you sure you want to delete \(selectedOutfits.count) outfit(s)? The items will remain in your closet.")
         }
     }
-}
-
-#Preview {
-    OutfitsView()
-        .environment(ClosetManager())
 }

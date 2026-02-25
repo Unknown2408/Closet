@@ -13,32 +13,30 @@ struct CreateOutfitView: View {
     @State private var selectedPosition: Position = .top
     @State private var selectedType: ClothingType? = nil
     @State private var selectedSeason: Season? = nil
-    
-    // Use the Style enum for filtering
     @State private var selectedStyle: Style? = nil
     
-    // --- FILTER LOGIC (Computed Property) ---
-    private var filteredInventory: [Cloth] {
-        
-        // ⚡️ OPTIMIZATION: Create a Set of IDs.
-        // Searching inside a Set is instantaneous, preventing UI lag when inventory is large.
+    // 🔥 1. NUOVO STATO: Invece di una computed property, usiamo una variabile di stato!
+    @State private var filteredInventory: [Cloth] = []
+    
+    // 🔥 2. LA FUNZIONE CHE FILTRA: La chiamiamo solo quando serve
+    private func applyFilters() {
+        // ⚡️ OTTIMIZZAZIONE: Creiamo un Set di ID per velocizzare la ricerca
         let selectedItemIDs = Set(selectedItems.map { $0.id })
         
-        return closetManager.inventory.filter { item in
-            
-            // 1. Exclude if already selected
+        filteredInventory = closetManager.inventory.filter { item in
+            // 1. Esclude se è già selezionato
             let isNotSelected = !selectedItemIDs.contains(item.id)
             
-            // 2. Macro-Position Filter (e.g., Tops)
+            // 2. Filtro Macro-Posizione (es. Tops)
             let matchesPosition = item.type.possiblePositions.contains(selectedPosition)
             
-            // 3. Micro-Type Filter (e.g., T-shirts) - Only if a specific type is selected
+            // 3. Filtro Micro-Tipo (es. T-shirts)
             let matchesType = selectedType == nil || item.type == selectedType
             
-            // 4. Season Filter (item.season is an array [Season])
+            // 4. Filtro Stagione
             let matchesSeason = selectedSeason == nil || item.season.contains(selectedSeason!)
             
-            // 5. Style Filter (using Style enum)
+            // 5. Filtro Stile
             let matchesStyle = selectedStyle == nil || item.style.contains(selectedStyle!)
             
             return isNotSelected && matchesPosition && matchesType && matchesSeason && matchesStyle
@@ -91,9 +89,11 @@ struct CreateOutfitView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
+                        .foregroundStyle(.red) // 🔴 Cancel in rosso
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
+                    // 🟢 Save diventa Done
+                    Button("Done") {
                         let name = outfitName.isEmpty ? "New Outfit" : outfitName
                         closetManager.addOutfit(name: name, items: selectedItems.map { $0.id })
                         dismiss()
@@ -101,6 +101,16 @@ struct CreateOutfitView: View {
                     .disabled(selectedItems.isEmpty)
                 }
             }
+            // 🔥 3. AGGIORNIAMO I FILTRI SOLO QUANDO SERVE:
+            .onAppear {
+                applyFilters() // Primo caricamento
+            }
+            // Osserviamo i cambiamenti (sintassi iOS 17+)
+            .onChange(of: selectedPosition) { _, _ in applyFilters() }
+            .onChange(of: selectedType) { _, _ in applyFilters() }
+            .onChange(of: selectedSeason) { _, _ in applyFilters() }
+            .onChange(of: selectedStyle) { _, _ in applyFilters() }
+            .onChange(of: selectedItems.count) { _, _ in applyFilters() } // Aggiorna se aggiungo/rimuovo un capo
         }
     }
 }
