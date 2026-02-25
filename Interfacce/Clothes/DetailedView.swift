@@ -100,7 +100,7 @@ struct DetailedView: View {
 
             // Pulsante Match (rimane fisso in basso)
             Button(action: { showingMatchesSheet = true }) {
-                Text("Match ✨")
+                Text("Match")
                     .font(.headline)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)

@@ -12,7 +12,7 @@ struct OutfitNameSection: View {
     }
 }
 
-// 🔥 ECCO IL COMPONENTE MANCANTE: OutfitSlotRow
+// 🔥 COMPONENTE AGGIORNATO: OutfitSlotRow (Senza l'Add testuale)
 struct OutfitSlotRow: View {
     let position: Position
     let items: [Cloth]
@@ -22,19 +22,11 @@ struct OutfitSlotRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             
-            HStack {
-                Text(position.rawValue)
-                    .font(.headline)
-                Spacer()
-                Button(action: onAdd) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "plus")
-                        Text("Add")
-                    }
-                    .font(.subheadline).bold()
-                }
-            }
+            // Intestazione pulita: solo il nome della categoria (es. "Tops")
+            Text(position.rawValue)
+                .font(.headline)
             
+            // Se lo slot è vuoto, mostra il placeholder tratteggiato grande
             if items.isEmpty {
                 Button(action: onAdd) {
                     RoundedRectangle(cornerRadius: 12)
@@ -49,6 +41,7 @@ struct OutfitSlotRow: View {
                 }
                 .buttonStyle(.plain)
             } else {
+                // Se ci sono capi, mostra lo scroll orizzontale con le miniature e il "+" finale
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
                         ForEach(items) { item in
@@ -57,6 +50,7 @@ struct OutfitSlotRow: View {
                             }
                         }
                         
+                        // Tasto "+" per aggiungere ulteriori capi nello stesso slot
                         Button(action: onAdd) {
                             RoundedRectangle(cornerRadius: 12)
                                 .stroke(style: StrokeStyle(lineWidth: 2, dash: [5]))
