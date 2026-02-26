@@ -14,7 +14,7 @@ struct NewItemView: View {
     @State private var selectedType: ClothingType = .tShirt
     
     @State private var isAllSeasons: Bool = false
-    @State private var selectedSeasons: Set<Season> = [.summer]
+    @State private var selectedSeasons: Set<Season> = []
     
     @State private var selectedStyle: Style = .casual
     
