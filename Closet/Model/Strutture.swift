@@ -29,6 +29,7 @@ enum ClothingType: String, CaseIterable, Codable, Identifiable {
     case tShirt = "T-shirts"
     case shirt = "Shirts"
     case tops = "Tops"
+    case polos = "Polos"
     
     // Bottoms
     case skirt = "Skirts"
@@ -58,6 +59,7 @@ enum ClothingType: String, CaseIterable, Codable, Identifiable {
     case glasses = "Glasses"
     case hat = "Hats"
     case jewellery = "Jewellery"
+    case clock = "Clocks"
     
     // Footwear
     case flats = "Flats"
@@ -71,7 +73,7 @@ enum ClothingType: String, CaseIterable, Codable, Identifiable {
     // LOGICA DELLE POSIZIONI AGGIORNATA
     var possiblePositions: [Position] {
         switch self {
-        case .tShirt, .shirt, .tops:
+        case .tShirt, .shirt, .tops, .polos:
             return [.top]
             
         case .skirt, .trousers, .shorts, .jeans:
@@ -83,7 +85,7 @@ enum ClothingType: String, CaseIterable, Codable, Identifiable {
         case .dress, .jumpsuit, .suit, .robe:
             return [.fullbody]
             
-        case .bag, .tie, .scarf, .belt, .glasses, .hat, .jewellery:
+        case .bag, .tie, .scarf, .belt, .glasses, .hat, .jewellery, .clock:
             return [.accessories]
             
         case .flats, .heels, .sandals, .sneakers, .boots:

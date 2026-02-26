@@ -176,7 +176,7 @@ struct MagicMatchList: View {
     var body: some View {
         if !items.isEmpty {
             VStack(alignment: .leading) {
-                Text("Suggested for you ✨").font(.headline).padding(.horizontal)
+                Text("Suggested for you").font(.headline).padding(.horizontal)
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 15) {
                         ForEach(items) { item in

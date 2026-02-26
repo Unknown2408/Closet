@@ -33,8 +33,7 @@ struct SlotSelectionView: View {
             magicMatchSuggestions = []
         }
         
-        // --- FILTRO GRIGLIA NORMALE ---
-        filteredInventory = closetManager.inventory.filter { item in
+        filteredInventory = closetManager.inventory.reversed().filter { item in
             let matchesPosition = item.type.possiblePositions.contains(position)
             let isNotSelected = !allSelectedIDs.contains(item.id)
             let matchesType = selectedType == nil || item.type == selectedType

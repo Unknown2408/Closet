@@ -20,19 +20,16 @@ struct ClosetContentView: View {
     
     // MARK: - Logica di Filtraggio
     var filteredInventory: [Cloth] {
-        manager.inventory.filter { item in
+        manager.inventory.reversed().filter { item in
             // 1. Filtro Stagione
             let matchesSeason = selectedSeason == nil || item.season.contains(selectedSeason!)
             // 2. Filtro Stile
             let matchesStyle = selectedStyle == nil || item.style.contains(selectedStyle!)
             // 3. Filtro Brand
             let matchesBrand = selectedBrand == nil || item.brand == selectedBrand
-            
             // 4. NUOVO FILTRO PREFERITI
-            // Se showFavoritesOnly è true, l'item deve essere preferito.
-            // Se è false, accettiamo tutto.
             let matchesFavorite = !showFavoritesOnly || item.favourite
-            
+                
             return matchesSeason && matchesStyle && matchesBrand && matchesFavorite
         }
     }
